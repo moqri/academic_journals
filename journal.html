@@ -1,0 +1,132 @@
+<html>
+<head>
+<script language="JavaScript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+
+</head>
+<body>
+	<h3>Impact</h3>
+	<table id="data-table">
+	    <thead>
+	        <tr>
+	            <td>Year</td>
+	            <td>Articles</td>
+	            <td>Citations</td>
+	            <td>Impact (Articles/Citations)</td>
+	            <td>h-index</td>
+	        </tr>	        
+	    </thead>
+	    <tbody>
+	        <tr>
+				<td>2014</td>
+				<td id='2014_articles'></td>
+				<td id='2014_citations'></td>
+				<td id='2014_impact'></td>
+				<td id='2014_h'></td>
+	        </tr>
+	        <tr>
+				<td>2015</td>
+				<td id='2015_articles'></td>
+				<td id='2015_citations'></td>
+				<td id='2015_impact'></td>
+				<td id='2015_h'></td>
+	        </tr>
+	        <tr>
+	        	<td>2016</td>
+				<td id='2016_articles'></td>
+				<td id='2016_citations'></td>
+				<td id='2016_impact'></td>
+				<td id='2016_h'></td>
+	        </tr>
+	        <tr>
+	        	<td>3-year</td>
+				<td id='total_articles'></td>
+				<td id='total_citations'></td>
+				<td id='total_impact'></td>
+				<td id='total_h'></td>
+	        </tr>
+	    </tbody>
+	</table>
+	<h3>h-indexed Articles</h3>
+	<table id='top'>
+		<thead>
+			<td>Article</td>
+			<td>Citations</td>
+		</thead>
+	</table>
+</body>
+<script>
+	function h_index(cites_3years){
+		var h=0
+		cites_3years.sort(function (a, b) {  return b - a;  });
+    	for (i=1; i <= cites_3years.length; i++){
+            if (cites_3years[i-1] >= i){
+	            h=i
+	        }
+	    }
+	    return h;
+	}
+
+	function impact(year){
+		url='http://api.crossref.org/journals/'+issn+'/works?rows=1000&filter=from-pub-date:'+year+',until-pub-date:'+year
+		return $.ajax({
+		  	url: url,
+		  	method: 'GET'
+		}).then(function(data) {
+			total_articles=data['message']['total-results']
+			total_articles_3years+=total_articles
+			document.getElementById(year+'_articles').innerHTML = total_articles;	
+			items=data['message']['items'];
+			cites[year]=[]
+			items.forEach(function(item) {
+				doi=item['DOI'];
+				cite=item['is-referenced-by-count'];
+				cites[year].push(cite)
+				dic[doi]=cite
+			});
+			cites_3years=cites_3years.concat(cites[year])
+			total_citations=cites[year].reduce(function(a, b) { return a + b;}, 0);
+			if (total_articles>0){
+			impact=total_citations/total_articles;
+			}else impact=0;
+			
+			document.getElementById(year+'_citations').innerHTML = total_citations;
+			document.getElementById(year+'_impact').innerHTML = impact.toFixed(2);	
+
+			total_citations_3years=cites_3years.reduce(function(a, b){ return a + b;},0);
+			if (total_articles_3years){
+			impact_3years=total_citations_3years/total_articles_3years;
+			}else impact_3years=0;
+			
+			document.getElementById('total_articles').innerHTML = total_articles_3years;
+			document.getElementById('total_citations').innerHTML = total_citations_3years;
+			document.getElementById('total_impact').innerHTML = impact_3years.toFixed(2);	
+		});
+	}
+
+	$(document).ready(function () {
+		issn=window.location.search.replace('?issn=','');
+		years=['2014','2015','2016'];
+		total_articles_3years=0
+		cites_3years=[]
+		dic={}
+		cites={}
+
+
+		years.forEach(function(year){
+			impact(year)
+		});
+
+		$(document).ajaxStop(function () {
+			h=h_index(cites_3years)
+		    years.forEach(function(year){
+				document.getElementById('total_h').innerHTML = h;	
+			});
+			sorted_dois = Object.keys(dic).sort(function(a,b){return dic[b]-dic[a]}).slice(0, h);
+			sorted_dois.forEach(function(sorted_doi){
+				document.getElementById('top').innerHTML += '<tr><td>'+sorted_doi+'</td><td>'+dic[sorted_doi]+'</td></tr>'
+			});
+
+		});
+	});
+</script>
+</html>
