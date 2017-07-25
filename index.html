@@ -35,11 +35,21 @@ $(document).ready(function() {
 });
 $("#user_input").on('change keyup paste', find_journals);
 	function find_journals(){
-	endpoint='http://brdb.warrington.ufl.edu:3030/journals_0602/query';
+	endpoint='http://brdb.warrington.ufl.edu:3030/test/query';
 	search=document.getElementById("user_input").value;
 	filter=' filter(regex(lcase(?t),"'+search+'")) ';
 	limit='limit 100';
-	query='select DISTINCT ?t ?p ?i where { ?s <e:title> ?t; <e:publisher> ?p; <e:issn> ?i'+filter+ '}' + limit 
+	query='select DISTINCT * where { '+
+	'?s <e:title> ?t;'+
+	'<e:publisher> ?p;'+
+	'<e:issn> ?i;'+
+	'<e:count> ?docs;'+
+	'<e:cited> ?cited;'+
+	'<e:citation> ?citation;'+
+	'<e:impact> ?impact;'+
+	'<e:h> ?h;'+
+	filter+ 
+	'}' + limit 
 	url=endpoint+'?query='+query
 		return $.ajax({
 		  	url: url,
@@ -50,11 +60,23 @@ $("#user_input").on('change keyup paste', find_journals);
 			journals.forEach(function(journal){
 				title=journal['t']['value'];
 				publisher=journal['p']['value'];
-				issn=journal['i']['value'];				
+				issn=journal['i']['value'];		
+				docs=journal['docs']['value'];		
+				cited=journal['cited']['value'];		
+				citation=journal['citation']['value'];		
+				impact=journal['impact']['value'];		
+				h=journal['h']['value'];		
+				issn=journal['i']['value'];		
+						
 				document.getElementById('journals_table').innerHTML += '<tr>\
 				<td>'+title+'</td>\
 				<td>'+publisher+'</td>\
 				<td><a href=journal.html?issn='+issn+' target="_blank">'+issn+'</td>\
+				<td>'+docs+'</td>\
+				<td>'+cited+'</td>\
+				<td>'+citation+'</td>\
+				<td>'+impact+'</td>\
+				<td>'+h+'</td>\
 				<td>'
 			});
 		});
