@@ -1,86 +1,125 @@
-<html>
-<head>
-<script language="JavaScript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Scholarly Journals Database</title>
 
-</head>
-<body>
-	<form>
-		<label><b>Journal Name</b></label>
-		<input type="text" name="message" id="user_input" 
-	</form>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<body>
 
-  	<input type="submit" onclick="find_journals();"><br/>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Project name</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
 
-	<h3>Journals</h3>
-	<table id="journals_table">
-	    <thead>
-	        <tr>
-	            <td>Title</td>
-	            <td>Publisher</td>
-	            <td>ISSN</td>
-	        </tr>	        
-	    </thead>
-	    <tbody>
-	    </tbody>
-	</table>
+    <div class="container">	
+		<br></br>
+		<br></br>
+		<form class="form-group">
+			<label><b>Journal Name</b></label>
+			<input class="form-control" type="text" name="message" id="user_input" 
+		</form>
 
-<script>
-$(document).ready(function() {
-  $(window).keydown(function(event){
-    if(event.keyCode == 13) {
-      event.preventDefault();
-      return false;
-    }
-  });
-});
-$("#user_input").on('change keyup paste', find_journals);
-	function find_journals(){
-	endpoint='http://brdb.warrington.ufl.edu:3030/test/query';
-	search=document.getElementById("user_input").value;
-	filter=' filter(regex(lcase(?t),"'+search+'")) ';
-	limit='limit 100';
-	query='select DISTINCT * where { '+
-	'?s <e:title> ?t;'+
-	'<e:publisher> ?p;'+
-	'<e:issn> ?i;'+
-	'<e:count> ?docs;'+
-	'<e:cited> ?cited;'+
-	'<e:citation> ?citation;'+
-	'<e:impact> ?impact;'+
-	'<e:h> ?h;'+
-	filter+ 
-	'}' + limit 
-	url=endpoint+'?query='+query
-		return $.ajax({
-		  	url: url,
-		  	method: 'GET'
-		}).then(function(data) {
-			journals=data['results']['bindings'];
-			document.getElementById('journals_table').innerHTML='';
-			journals.forEach(function(journal){
-				title=journal['t']['value'];
-				publisher=journal['p']['value'];
-				issn=journal['i']['value'];		
-				docs=journal['docs']['value'];		
-				cited=journal['cited']['value'];		
-				citation=journal['citation']['value'];		
-				impact=journal['impact']['value'];		
-				h=journal['h']['value'];		
-				issn=journal['i']['value'];		
-						
-				document.getElementById('journals_table').innerHTML += '<tr>\
-				<td>'+title+'</td>\
-				<td>'+publisher+'</td>\
-				<td><a href=journal.html?issn='+issn+' target="_blank">'+issn+'</td>\
-				<td>'+docs+'</td>\
-				<td>'+cited+'</td>\
-				<td>'+citation+'</td>\
-				<td>'+impact+'</td>\
-				<td>'+h+'</td>\
-				<td>'
+		<!-- <input type="submit" onclick="find_journals();"> -->
+		<br></br>
+
+		<h3>Journals</h3>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Title</th>
+					<th>Publisher</th>
+					<th>Document Count</th>
+					<th>Cited Documents</th>
+					<th>Total Citations</th>
+					<th>Citation/Document</th>
+					<th>h Index</th>
+				</tr>	        
+			</thead>
+			<tbody id="journals_table">
+			</tbody>
+		</table>
+	</div>
+	<script>
+	$(document).ready(function() {
+		find_journals()
+	});
+	$("#user_input").on('change keyup paste', find_journals);
+		function find_journals(){
+		endpoint='http://brdb.warrington.ufl.edu:3030/test4/query';
+		search=document.getElementById("user_input").value;
+		filter=' filter(regex(lcase(?title),"'+search+'")) ';
+		limit='limit 100';
+	var query = [
+	 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
+	 "select DISTINCT ?s ?title ?docs ?cited ?citation (xsd:decimal(?impact_) AS ?impact) ?h (group_concat(?publisher) as ?publishers)",
+	 "WHERE {",
+		"?s <e:title> ?title;",
+		"<e:publisher> ?publisher;",
+		"<e:count> ?docs;",
+		"<e:cited> ?cited;",
+		"<e:citation> ?citation;",
+		"<e:impact> ?impact_;",
+		"<e:h> ?h;",
+		filter,
+	 "}",
+	 "group by ?s ?title ?docs ?cited ?citation ?impact_ ?h ",
+	 "ORDER BY DESC(?h)",
+	 limit
+	].join(" ");	
+		url=endpoint+'?query='+encodeURIComponent(query) +"&format=json";
+		console.log(url)
+
+			return $.ajax({
+				url: url,
+				method: 'GET'
+			}).then(function(data) {
+				journals=data['results']['bindings'];
+				console.log(document.getElementById('journals_table'))			
+				document.getElementById('journals_table').innerHTML='';
+				journals.forEach(function(journal){
+					title=journal['title']['value'];
+					publisher=journal['publishers']['value'];
+					issn=journal['s']['value'].slice(-9);		
+					docs=journal['docs']['value'];		
+					cited=journal['cited']['value'];		
+					citation=journal['citation']['value'];		
+					impact=journal['impact']['value'];		
+					h=journal['h']['value'];		
+							
+					document.getElementById('journals_table').innerHTML += '<tr>\
+					<td><a href=journal.html?issn='+issn+' target="_blank">'+title+'</td>\
+					<td>'+publisher+'</td>\
+					<td>'+docs+'</td>\
+					<td>'+cited+'</td>\
+					<td>'+citation+'</td>\
+					<td>'+impact+'</td>\
+					<td>'+h+'</td>\
+					</tr>'
+				});
 			});
-		});
-	};
-</script>
+		};
+	</script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>

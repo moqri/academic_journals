@@ -1,18 +1,48 @@
-<html>
-<head>
-<script language="JavaScript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Scholarly Journals Database</title>
 
-</head>
-<body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Project name</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">	
+	<br></br>
 	<h3>Impact</h3>
-	<table id="data-table">
+	<table class="table" id="data-table">
 	    <thead>
 	        <tr>
-	            <td>Year</td>
-	            <td>Articles</td>
-	            <td>Citations</td>
-	            <td>Impact (Articles/Citations)</td>
-	            <td>h-index</td>
+	            <th>Year</th>
+	            <th>Articles</th>
+	            <th>Citations</th>
+	            <th>Impact (Articles/Citations)</th>
+	            <th>h-index</th>
 	        </tr>	        
 	    </thead>
 	    <tbody>
@@ -47,12 +77,14 @@
 	    </tbody>
 	</table>
 	<h3>h-indexed Articles</h3>
-	<table id='top'>
+	<table class="table" id='top'>
 		<thead>
-			<td>Article</td>
-			<td>Citations</td>
+			<th>Article</th>
+			<th>Year</th>
+			<th>Citations</th>
 		</thead>
 	</table>
+	</div>
 </body>
 <script>
 	function h_index(cites_3years){
@@ -82,6 +114,14 @@
 				cite=item['is-referenced-by-count'];
 				cites[year].push(cite)
 				dic[doi]=cite
+				title[doi]=item['title']
+				year[doi]=item['title']
+				if ('published-print' in item){
+					year_dic[doi]=item['published-print']['date-parts'][0][0]
+				}
+				if ('published-online' in item){
+					year_dic[doi]=item['published-online']['date-parts'][0][0]
+				}
 			});
 			cites_3years=cites_3years.concat(cites[year])
 			total_citations=cites[year].reduce(function(a, b) { return a + b;}, 0);
@@ -110,6 +150,8 @@
 		cites_3years=[]
 		dic={}
 		cites={}
+		title={}
+		year_dic={}
 
 
 		years.forEach(function(year){
@@ -123,7 +165,7 @@
 			});
 			sorted_dois = Object.keys(dic).sort(function(a,b){return dic[b]-dic[a]}).slice(0, h);
 			sorted_dois.forEach(function(sorted_doi){
-				document.getElementById('top').innerHTML += '<tr><td>'+sorted_doi+'</td><td>'+dic[sorted_doi]+'</td></tr>'
+				document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+sorted_doi+' target="_blank">' +title[sorted_doi]+'</td><td>'+year_dic[sorted_doi]+'</td><td>'+dic[sorted_doi]+'</td></tr>'
 			});
 
 		});
