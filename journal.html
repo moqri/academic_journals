@@ -156,7 +156,8 @@
 
 	$(document).ready(function () {
 		issn=window.location.search.replace('?issn=','');
-		years=['2014']//,'2015','2016'];
+		docs=parseInt(window.location.search.replace('?docs=',''));
+		//years=['2014','2015','2016'];
 		citable_documents_3years=0
 		cites_3years=[]
 		dic={}
@@ -165,7 +166,9 @@
 		year_dic={}
 
 
-		years.forEach(function(year){
+		//years.forEach(function(year){
+		year='2014'
+		for (i=0; i<docs/100, i++){
 			impact(year)
 		});
 

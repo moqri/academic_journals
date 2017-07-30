@@ -73,7 +73,7 @@
 	});
 	//$("#user_input").on('change keyup paste', find_journals);
 	function find_journals(){
-	endpoint='http://brdb.warrington.ufl.edu:3030/test4/query';
+	endpoint='http://brdb.warrington.ufl.edu:3030/test5/query';
 	search=document.getElementById("user_input").value;
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
 	limit='limit 100';
@@ -114,7 +114,7 @@
 					h=journal['h']['value'];		
 							
 					document.getElementById('journals_table').innerHTML += '<tr>\
-					<td><a href=journal.html?issn='+issn+' target="_blank">'+title+'</td>\
+					<td><a href=journal.html?issn='+issn+'&documents='+docs+' target="_blank">'+title+'</td>\
 					<td>'+publisher+'</td>\
 					<td>'+docs+'</td>\
 					<td>'+cited+'</td>\
