@@ -91,6 +91,15 @@
 	</div>
 </body>
 <script>
+	function getParameterByName(name, url) {
+	    if (!url) url = window.location.href;
+	    name = name.replace(/[\[\]]/g, "\\$&");
+	    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+	        results = regex.exec(url);
+	    if (!results) return null;
+	    if (!results[2]) return '';
+	    return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}
 	function h_index(cites_3years){
 		var h=0
 		cites_3years.sort(function (a, b) {  return b - a;  });
@@ -102,75 +111,84 @@
 	    return h;
 	}
 
-	function impact(year){
-		url='http://api.crossref.org/journals/'+issn+'/works?rows=1000&filter=from-pub-date:'+year+',until-pub-date:'+year
+	function cross(cursor){
+		url='http://api.crossref.org/journals/'+issn+'/works?rows=1000&filter=from-pub-date:2014,until-pub-date:2016&cursor='+encodeURIComponent(cursor)
 		//console.log(url)
 		$.ajax({
 		  	url: url,
-		  	method: 'GET'
-		}).then(function(data) {
-			total_documents=data['message']['total-results']
-			console.log(total_documents)
+		  	method: 'GET',
+		  	success: function(data) {
+				items=data['message']['items'];
+				items.forEach(function(item) {
+					doi=item['DOI'];
+					cite=item['is-referenced-by-count'];
+					yearp=yearo=9999
+					if ('published-print' in item){
+						yearp=item['published-print']['date-parts'][0][0]
+					}
+					if ('published-online' in item){
+						yearo=item['published-online']['date-parts'][0][0]
+					}
+					year=Math.min(yearp,yearo)
+					year_dic[doi]=year
+					cites[year].push(cite)
+					//if ('author' in item | 1){citable_documents[year]++;	}
+					dic[doi]=cite
+					title[doi]=item['title']
+				});
+				total_documents_3years=0
+				cites_3years=[]
+				for (var year = 2014; year < 2017; year++) {
+					console.log(year)
+					if (cites[year].length>0){
+					total_documents[year]=cites[year].length
 
-			//total_articles_3years+=total_articles
-			items=data['message']['items'];
-			citable_documents=0;
-			cites[year]=[]
-			items.forEach(function(item) {
-				doi=item['DOI'];
-				if ('author' in item){citable_documents++;	}
-				cite=item['is-referenced-by-count'];
-				cites[year].push(cite)
-				dic[doi]=cite
-				title[doi]=item['title']
-				year[doi]=item['title']
-				if ('published-print' in item){
-					year_dic[doi]=item['published-print']['date-parts'][0][0]
+						total_documents_3years+=total_documents[year]
+						cites_3years=cites_3years.concat(cites[year])
+						total_citations=cites[year].reduce(function(sum, value) {return sum + value}, 0);
+
+						if (total_documents[year]>0){
+						impact=total_citations/total_documents[year];
+						}else impact=0;
+						document.getElementById(year+'_articles').innerHTML = total_documents[year]	
+						document.getElementById(year+'_citations').innerHTML = total_citations;
+						document.getElementById(year+'_impact').innerHTML = impact.toFixed(2);	
+
+						total_citations_3years=cites_3years.reduce(function(a, b){ return a + b;},0);
+						if (total_documents_3years){
+						impact_3years=total_citations_3years/total_documents_3years;
+						}else impact_3years=0;
+						
+						document.getElementById('citable_articles').innerHTML = total_documents_3years;
+						document.getElementById('total_citations').innerHTML = total_citations_3years;
+						document.getElementById('total_impact').innerHTML = impact_3years.toFixed(2);
+					}
+				}	
+				next_cursor=data['message']['next-cursor']
+				if (next_cursor!=cursor){
+					return cross(next_cursor)
 				}
-				if ('published-online' in item){
-					year_dic[doi]=item['published-online']['date-parts'][0][0]
-				}
-			});
-			citable_documents_3years+=citable_documents
-			cites_3years=cites_3years.concat(cites[year])
-			total_citations=cites[year].reduce(function(sum, value) {return sum + value}, 0);
-
-			if (citable_documents>0){
-			impact=total_citations/citable_documents;
-			}else impact=0;
-			document.getElementById(year+'_articles').innerHTML = citable_documents		
-			document.getElementById(year+'_citations').innerHTML = total_citations;
-			document.getElementById(year+'_impact').innerHTML = impact.toFixed(2);	
-
-			total_citations_3years=cites_3years.reduce(function(a, b){ return a + b;},0);
-			if (citable_documents_3years){
-			impact_3years=total_citations_3years/citable_documents_3years;
-			}else impact_3years=0;
-			
-			document.getElementById('citable_articles').innerHTML = citable_documents_3years;
-			document.getElementById('total_citations').innerHTML = total_citations_3years;
-			document.getElementById('total_impact').innerHTML = impact_3years.toFixed(2);	
+			}
 		});
-		
 	}
-
 	$(document).ready(function () {
-		issn=window.location.search.replace('?issn=','');
-		docs=parseInt(window.location.search.replace('?docs=',''));
+		issn=getParameterByName('issn');
+		docs=parseInt(getParameterByName('documents'));
 		//years=['2014','2015','2016'];
-		citable_documents_3years=0
+		total_documents_3years=0
 		cites_3years=[]
 		dic={}
-		cites={}
+		cites={};cites[2014]=[];cites[2015]=[];cites[2016]=[]
+		total_documents={2014:0,2015:0,2016:0}
 		title={}
 		year_dic={}
 
 
 		//years.forEach(function(year){
-		year='2014'
-		for (i=0; i<docs/100, i++){
-			impact(year)
-		});
+		docs=1000
+		years=['2014']
+		cursor='*'
+		cursor=cross(cursor)
 
 		$(document).ajaxStop(function () {
 			h=h_index(cites_3years)
