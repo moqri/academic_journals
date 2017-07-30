@@ -9,7 +9,9 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-	<body>
+    <link rel = "stylesheet" type = "text/css" href = "css/style.css">
+  </head>
+  <body>
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
@@ -35,12 +37,11 @@
     <div class="container">	
 		<br></br>
 		<br></br>
-		<form class="form-group">
+		
 			<label><b>Journal Name</b></label>
-			<input class="form-control" type="text" name="message" id="user_input" 
-		</form>
-
-		<!-- <input type="submit" onclick="find_journals();"> -->
+			<input class="form-control" type="text" id="user_input"> 
+			<input class="form-control" type="submit" onclick="find_journals();">
+		
 		<br></br>
 
 		<h3>Journals</h3>
@@ -49,7 +50,7 @@
 				<tr>
 					<th>Title</th>
 					<th>Publisher</th>
-					<th>Document Count</th>
+					<th>Citable Documents</th>
 					<th>Cited Documents</th>
 					<th>Total Citations</th>
 					<th>Citation/Document</th>
@@ -59,17 +60,23 @@
 			<tbody id="journals_table">
 			</tbody>
 		</table>
+		<div class="loader"></div>
 	</div>
+
 	<script>
 	$(document).ready(function() {
 		find_journals()
+		$('#user_input').keypress(function(e){
+		  if(e.keyCode==13)
+		  find_journals();
+		});		
 	});
-	$("#user_input").on('change keyup paste', find_journals);
-		function find_journals(){
-		endpoint='http://brdb.warrington.ufl.edu:3030/test4/query';
-		search=document.getElementById("user_input").value;
-		filter=' filter(regex(lcase(?title),"'+search+'")) ';
-		limit='limit 100';
+	//$("#user_input").on('change keyup paste', find_journals);
+	function find_journals(){
+	endpoint='http://brdb.warrington.ufl.edu:3030/test4/query';
+	search=document.getElementById("user_input").value;
+	filter=' filter(regex(lcase(?title),"'+search+'")) ';
+	limit='limit 100';
 	var query = [
 	 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
 	 "select DISTINCT ?s ?title ?docs ?cited ?citation (xsd:decimal(?impact_) AS ?impact) ?h (group_concat(?publisher) as ?publishers)",
@@ -89,7 +96,6 @@
 	].join(" ");	
 		url=endpoint+'?query='+encodeURIComponent(query) +"&format=json";
 		console.log(url)
-
 			return $.ajax({
 				url: url,
 				method: 'GET'
@@ -115,11 +121,13 @@
 					<td>'+citation+'</td>\
 					<td>'+impact+'</td>\
 					<td>'+h+'</td>\
-					</tr>'
+					</tr>'			
 				});
+			$(".loader").hide();
 			});
 		};
-	</script>
+
+		</script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-</body>
+  </body>
 </html>

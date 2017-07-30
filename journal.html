@@ -9,6 +9,9 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel = "stylesheet" type = "text/css" href = "css/style.css">
+
+	</head>
 	<body>
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -39,7 +42,7 @@
 	    <thead>
 	        <tr>
 	            <th>Year</th>
-	            <th>Articles</th>
+	            <th>Citable Documents</th>
 	            <th>Citations</th>
 	            <th>Impact (Articles/Citations)</th>
 	            <th>h-index</th>
@@ -69,7 +72,7 @@
 	        </tr>
 	        <tr>
 	        	<td>3-year</td>
-				<td id='total_articles'></td>
+				<td id='citable_articles'></td>
 				<td id='total_citations'></td>
 				<td id='total_impact'></td>
 				<td id='total_h'></td>
@@ -84,6 +87,7 @@
 			<th>Citations</th>
 		</thead>
 	</table>
+	<div class="loader"></div>
 	</div>
 </body>
 <script>
@@ -100,17 +104,21 @@
 
 	function impact(year){
 		url='http://api.crossref.org/journals/'+issn+'/works?rows=1000&filter=from-pub-date:'+year+',until-pub-date:'+year
-		return $.ajax({
+		//console.log(url)
+		$.ajax({
 		  	url: url,
 		  	method: 'GET'
 		}).then(function(data) {
-			total_articles=data['message']['total-results']
-			total_articles_3years+=total_articles
-			document.getElementById(year+'_articles').innerHTML = total_articles;	
+			total_documents=data['message']['total-results']
+			console.log(total_documents)
+
+			//total_articles_3years+=total_articles
 			items=data['message']['items'];
+			citable_documents=0;
 			cites[year]=[]
 			items.forEach(function(item) {
 				doi=item['DOI'];
+				if ('author' in item){citable_documents++;	}
 				cite=item['is-referenced-by-count'];
 				cites[year].push(cite)
 				dic[doi]=cite
@@ -123,30 +131,33 @@
 					year_dic[doi]=item['published-online']['date-parts'][0][0]
 				}
 			});
+			citable_documents_3years+=citable_documents
 			cites_3years=cites_3years.concat(cites[year])
-			total_citations=cites[year].reduce(function(a, b) { return a + b;}, 0);
-			if (total_articles>0){
-			impact=total_citations/total_articles;
+			total_citations=cites[year].reduce(function(sum, value) {return sum + value}, 0);
+
+			if (citable_documents>0){
+			impact=total_citations/citable_documents;
 			}else impact=0;
-			
+			document.getElementById(year+'_articles').innerHTML = citable_documents		
 			document.getElementById(year+'_citations').innerHTML = total_citations;
 			document.getElementById(year+'_impact').innerHTML = impact.toFixed(2);	
 
 			total_citations_3years=cites_3years.reduce(function(a, b){ return a + b;},0);
-			if (total_articles_3years){
-			impact_3years=total_citations_3years/total_articles_3years;
+			if (citable_documents_3years){
+			impact_3years=total_citations_3years/citable_documents_3years;
 			}else impact_3years=0;
 			
-			document.getElementById('total_articles').innerHTML = total_articles_3years;
+			document.getElementById('citable_articles').innerHTML = citable_documents_3years;
 			document.getElementById('total_citations').innerHTML = total_citations_3years;
 			document.getElementById('total_impact').innerHTML = impact_3years.toFixed(2);	
 		});
+		
 	}
 
 	$(document).ready(function () {
 		issn=window.location.search.replace('?issn=','');
-		years=['2014','2015','2016'];
-		total_articles_3years=0
+		years=['2014']//,'2015','2016'];
+		citable_documents_3years=0
 		cites_3years=[]
 		dic={}
 		cites={}
@@ -168,6 +179,7 @@
 				document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+sorted_doi+' target="_blank">' +title[sorted_doi]+'</td><td>'+year_dic[sorted_doi]+'</td><td>'+dic[sorted_doi]+'</td></tr>'
 			});
 
+		$(".loader").hide();
 		});
 	});
 </script>
