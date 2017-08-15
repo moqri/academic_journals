@@ -51,24 +51,21 @@
 	    <tbody>
 	        <tr>
 				<td>2014</td>
-				<td id='2014_articles'></td>
-				<td id='2014_citations'></td>
-				<td id='2014_impact'></td>
-				<td id='2014_h'></td>
+				<td id='4_articles'></td>
+				<td id='4_citations'></td>
+				<td id='4_impact'></td>
 	        </tr>
 	        <tr>
 				<td>2015</td>
-				<td id='2015_articles'></td>
-				<td id='2015_citations'></td>
-				<td id='2015_impact'></td>
-				<td id='2015_h'></td>
+				<td id='5_articles'></td>
+				<td id='5_citations'></td>
+				<td id='5_impact'></td>
 	        </tr>
 	        <tr>
 	        	<td>2016</td>
-				<td id='2016_articles'></td>
-				<td id='2016_citations'></td>
-				<td id='2016_impact'></td>
-				<td id='2016_h'></td>
+				<td id='6_articles'></td>
+				<td id='6_citations'></td>
+				<td id='6_impact'></td>
 	        </tr>
 	        <tr>
 	        	<td>3-year</td>
@@ -110,6 +107,72 @@
 	    }
 	    return h;
 	}
+
+	function get_journal(issn){
+		base='http://brdb.warrington.ufl.edu:3030/test11/'
+		s='<'+base+issn+'>'
+		endpoint=base+'query'
+		limit='limit 100';
+		var query = [
+		 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
+		 "select DISTINCT ?s ?title ",
+		 "?docs_4 ?citation_4 (xsd:decimal(?impact_float_4) AS ?impact_4) ",
+		 "?docs_5 ?citation_5 (xsd:decimal(?impact_float_5) AS ?impact_5) ",
+		 "?docs_6 ?citation_6 (xsd:decimal(?impact_float_6) AS ?impact_6) ",
+		 "?docs   ?citation   (xsd:decimal(?impact_float) AS ?impact) ",
+		 "?h (group_concat(?publisher) as ?publishers)",
+		 "WHERE {",
+			s,
+			" <e:title> ?title;",
+			"<e:publisher> ?publisher;",
+			"<e:count_4> ?docs_4; <e:citation_4> ?citation_4; <e:impact_4> ?impact_float_4;",
+			"<e:count_5> ?docs_5; <e:citation_5> ?citation_5; <e:impact_5> ?impact_float_5;",
+			"<e:count_6> ?docs_6; <e:citation_6> ?citation_6; <e:impact_6> ?impact_float_6;",
+			"<e:count> ?docs;",
+			"<e:citation> ?citation;",
+			"<e:impact> ?impact_float;",
+			"<e:h> ?h;",
+		 "}",
+		 "group by ?s ?title ",
+		 "?docs_4 ?citation_4 ?impact_float_4 ",
+		 "?docs_5 ?citation_5 ?impact_float_5 ",
+		 "?docs_6 ?citation_6 ?impact_float_6 ",
+		 "?docs ?citation ?impact_float ?h ",
+		 "ORDER BY DESC(?h)",
+		 limit
+		].join(" ");	
+		url=endpoint+'?query='+encodeURIComponent(query) +"&format=json";
+		console.log(url)
+			return $.ajax({
+				url: url,
+				method: 'GET'
+			}).then(function(data) {
+				journal=data['results']['bindings'][0];
+				console.log(document.getElementById('journals_table'))			
+				console.log(journal)
+				title=journal['title']['value'];
+				publisher=journal['publishers']['value'];
+				count_documents['total']=journal['docs']['value'];		
+				count_citation['total']=journal['citation']['value'];		
+				impact['total']=journal['impact']['value'];		
+				h=journal['h']['value'];
+
+				for (var year = 4; year < 7; year++) {
+					year=year.toString()
+					count_documents[year]=journal['docs_'+year]['value'];
+					count_citation[year]=journal['citation_'+year]['value'];
+					impact[year]=journal['impact_'+year]['value'];
+					document.getElementById(year+'_articles').innerHTML = count_documents[year]
+					document.getElementById(year+'_citations').innerHTML = count_citation[year]
+					document.getElementById(year+'_impact').innerHTML = impact[year]
+				}
+				document.getElementById('citable_articles').innerHTML = count_documents['total'];
+				document.getElementById('total_citations').innerHTML = count_citation['total']
+				document.getElementById('total_impact').innerHTML = impact['total']		
+				document.getElementById('total_h').innerHTML = h;
+			$(".loader").hide();
+			});
+		};
 
 	function cross(cursor){
 		url='http://api.crossref.org/journals/'+issn+'/works?rows=1000&filter=from-pub-date:2014,until-pub-date:2016&cursor='+encodeURIComponent(cursor)
@@ -178,6 +241,9 @@
 		total_documents_3years=0
 		cites_3years=[]
 		dic={}
+		count_documents={}
+		count_citation={}
+		impact={}
 		cites={};cites[2014]=[];cites[2015]=[];cites[2016]=[]
 		total_documents={2014:0,2015:0,2016:0}
 		title={}
@@ -188,13 +254,10 @@
 		docs=1000
 		years=['2014']
 		cursor='*'
-		cursor=cross(cursor)
+		//cursor=cross(cursor)
+		get_journal(issn)
 
 		$(document).ajaxStop(function () {
-			h=h_index(cites_3years)
-		    years.forEach(function(year){
-				document.getElementById('total_h').innerHTML = h;	
-			});
 			sorted_dois = Object.keys(dic).sort(function(a,b){return dic[b]-dic[a]}).slice(0, h);
 			sorted_dois.forEach(function(sorted_doi){
 				document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+sorted_doi+' target="_blank">' +title[sorted_doi]+'</td><td>'+year_dic[sorted_doi]+'</td><td>'+dic[sorted_doi]+'</td></tr>'

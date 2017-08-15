@@ -51,7 +51,6 @@
 					<th>Title</th>
 					<th>Publisher</th>
 					<th>Citable Documents</th>
-					<th>Cited Documents</th>
 					<th>Total Citations</th>
 					<th>Citation/Document</th>
 					<th>h Index</th>
@@ -73,24 +72,23 @@
 	});
 	//$("#user_input").on('change keyup paste', find_journals);
 	function find_journals(){
-	endpoint='http://brdb.warrington.ufl.edu:3030/test7/query';
+	endpoint='http://brdb.warrington.ufl.edu:3030/test11/query';
 	search=document.getElementById("user_input").value;
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
 	limit='limit 100';
 	var query = [
 	 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
-	 "select DISTINCT ?s ?title ?docs ?cited ?citation (xsd:decimal(?impact_) AS ?impact) ?h (group_concat(?publisher) as ?publishers)",
+	 "select DISTINCT ?s ?title ?docs ?citation (xsd:decimal(?impact_) AS ?impact) ?h (group_concat(?publisher) as ?publishers)",
 	 "WHERE {",
 		"?s <e:title> ?title;",
 		"<e:publisher> ?publisher;",
 		"<e:count> ?docs;",
-		"<e:cited> ?cited;",
 		"<e:citation> ?citation;",
 		"<e:impact> ?impact_;",
 		"<e:h> ?h;",
 		filter,
 	 "}",
-	 "group by ?s ?title ?docs ?cited ?citation ?impact_ ?h ",
+	 "group by ?s ?title ?docs ?citation ?impact_ ?h ",
 	 "ORDER BY DESC(?h)",
 	 limit
 	].join(" ");	
@@ -103,12 +101,12 @@
 				journals=data['results']['bindings'];
 				console.log(document.getElementById('journals_table'))			
 				document.getElementById('journals_table').innerHTML='';
+				console.log(journals)
 				journals.forEach(function(journal){
 					title=journal['title']['value'];
 					publisher=journal['publishers']['value'];
 					issn=journal['s']['value'].slice(-9);		
 					docs=journal['docs']['value'];		
-					cited=journal['cited']['value'];		
 					citation=journal['citation']['value'];		
 					impact=journal['impact']['value'];		
 					h=journal['h']['value'];		
@@ -117,7 +115,6 @@
 					<td><a href=journal.html?issn='+issn+'&documents='+docs+' target="_blank">'+title+'</td>\
 					<td>'+publisher+'</td>\
 					<td>'+docs+'</td>\
-					<td>'+cited+'</td>\
 					<td>'+citation+'</td>\
 					<td>'+impact+'</td>\
 					<td>'+h+'</td>\
