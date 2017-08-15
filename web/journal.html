@@ -26,7 +26,7 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="index.html">Home</a></li>
+            <li><a href="jdb.html">Home</a></li>
             <li><a href="mailto:moqri@ufl.edu">Contact</a></li>
           </ul>
         </div><!--/.nav-collapse -->
@@ -34,59 +34,66 @@
     </nav>
 
     <div class="container">	
-	<br><br><br>
-	<h3 id=title></h3>
-	<p id=publisher>Publisher: </p>
-	<p id=issn> ISSN: </p>
-	<br>
-	<h4>Impact</h4>
-	<table class="table" id="data-table">
-	    <thead>
-	        <tr>
-	            <th>Year</th>
-	            <th>Citable Documents</th>
-	            <th>Citations</th>
-	            <th>Impact (Articles/Citations)</th>
-	            <th>h3 Index</th>
-	        </tr>	        
-	    </thead>
-	    <tbody>
-	        <tr>
-				<td>2014</td>
-				<td id='4_articles'></td>
-				<td id='4_citations'></td>
-				<td id='4_impact'></td>
-	        </tr>
-	        <tr>
-				<td>2015</td>
-				<td id='5_articles'></td>
-				<td id='5_citations'></td>
-				<td id='5_impact'></td>
-	        </tr>
-	        <tr>
-	        	<td>2016</td>
-				<td id='6_articles'></td>
-				<td id='6_citations'></td>
-				<td id='6_impact'></td>
-	        </tr>
-	        <tr>
-	        	<td>3-year</td>
-				<td id='citable_articles'></td>
-				<td id='total_citations'></td>
-				<td id='total_impact'></td>
-				<td id='total_h'></td>
-	        </tr>
-	    </tbody>
-	</table>
-	<h4>h-indexed Articles</h4>
-	<table class="table" id='top'>
-		<thead>
-			<th>Article</th>
-			<th>Year</th>
-			<th>Citations</th>
-		</thead>
-	</table>
-	<div class="loader"></div>
+		<br><br><br>
+		<h3 id=title></h3>
+		<p id=publisher>Publisher: </p>
+		<p id=issn> ISSN: </p>
+		<br>
+		<h4>Impact</h4>
+		<table class="table" id="data-table">
+		    <thead>
+		        <tr>
+		            <th>Year</th>
+		            <th>Citable Documents</th>
+		            <th>Citations</th>
+		            <th>Impact (Articles/Citations)</th>
+		            <th>h3 Index</th>
+		        </tr>	        
+		    </thead>
+		    <tbody>
+		        <tr>
+					<td>2014</td>
+					<td id='4_articles'></td>
+					<td id='4_citations'></td>
+					<td id='4_impact'></td>
+		        </tr>
+		        <tr>
+					<td>2015</td>
+					<td id='5_articles'></td>
+					<td id='5_citations'></td>
+					<td id='5_impact'></td>
+		        </tr>
+		        <tr>
+		        	<td>2016</td>
+					<td id='6_articles'></td>
+					<td id='6_citations'></td>
+					<td id='6_impact'></td>
+		        </tr>
+		        <tr>
+		        	<td>3-year</td>
+					<td><b><p id='citable_articles'></p></b></td>
+					<td><b><P id='total_citations'></p></b></td>
+					<td><b><p id='total_impact'></p></b></td>
+					<td><b><p id='total_h'></p></b></td>
+		        </tr>
+		    </tbody>
+		</table>
+		<br>
+		<h4>Top Articles</h4>
+		<table class="table" id='top'>
+			<thead>
+				<th>Article</th>
+				<th>Year</th>
+				<th>Citations</th>
+			</thead>
+		</table>
+		<div class="loader"></div>
+		<button id="load_more" class="btn btn-link" type="submit" onclick="list_documents();">Load more (click and wait)</button>
+
+		<footer>
+		  <br>
+		  <p>Data Source: <a href="https://www.crossref.org/" target="_blank"> CrossReff</a></p>
+		</footer>
 	</div>
 </body>
 <script>
@@ -151,29 +158,29 @@
 				journal=data['results']['bindings'][0];
 				title=journal['title']['value'];
 				publisher=journal['publishers']['value'];
-				count_documents['total']=journal['docs']['value'];		
-				count_citation['total']=journal['citation']['value'];		
+				count_documents['total']=parseInt(journal['docs']['value']);		
+				count_citation['total']=parseInt(journal['citation']['value']);		
 				impact['total']=journal['impact']['value'];		
 				h=journal['h']['value'];
 
 				for (var year = 4; year < 7; year++) {
 					year=year.toString()
-					count_documents[year]=journal['docs_'+year]['value'];
-					count_citation[year]=journal['citation_'+year]['value'];
+					count_documents[year]=parseInt(journal['docs_'+year]['value']);
+					count_citation[year]=parseInt(journal['citation_'+year]['value']);
 					impact[year]=journal['impact_'+year]['value'];
-					document.getElementById(year+'_articles').innerHTML = count_documents[year]
-					document.getElementById(year+'_citations').innerHTML = count_citation[year]
+					document.getElementById(year+'_articles').innerHTML = count_documents[year].toLocaleString()
+					document.getElementById(year+'_citations').innerHTML = count_citation[year].toLocaleString()
 					document.getElementById(year+'_impact').innerHTML = impact[year]
 				}
-				document.getElementById('citable_articles').innerHTML = count_documents['total'];
-				document.getElementById('total_citations').innerHTML = count_citation['total']
+				document.getElementById('citable_articles').innerHTML = count_documents['total'].toLocaleString();
+				document.getElementById('total_citations').innerHTML = count_citation['total'].toLocaleString()
 				document.getElementById('total_impact').innerHTML = impact['total']		
 				document.getElementById('total_h').innerHTML = h;
 			});
 		};
 
-	function articles(){
-		url='http://api.crossref.org/journals/'+issn+'/works?rows=10&filter=from-pub-date:2014,until-pub-date:2016&sort=is-referenced-by-count'
+	function list_documents(){
+		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:2014,until-pub-date:2016&sort=is-referenced-by-count'+'&offset='+offset.toString()
 		//console.log(url)
 		$.ajax({
 		  	url: url,
@@ -194,7 +201,7 @@
 					title=item['title']
 					document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+doi+' target="_blank">' +title+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
 				});
-
+			offset+=20
 			}
 		});
 	}
@@ -206,8 +213,8 @@
 		count_documents={}
 		count_citation={}
 		impact={}
-
-		articles()
+		offset=0
+		list_documents()
 		get_journal(issn)
 
 		$(document).ajaxStop(function () {
