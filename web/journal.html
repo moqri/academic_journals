@@ -23,21 +23,23 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Project name</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="mailto:moqri@ufl.edu">Contact</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
 
     <div class="container">	
-	<br></br>
-	<h3>Impact</h3>
+	<br><br><br>
+	<h3 id=title></h3>
+	<p id=publisher>Publisher: </p>
+	<p id=issn> ISSN: </p>
+	<br>
+	<h4>Impact</h4>
 	<table class="table" id="data-table">
 	    <thead>
 	        <tr>
@@ -45,7 +47,7 @@
 	            <th>Citable Documents</th>
 	            <th>Citations</th>
 	            <th>Impact (Articles/Citations)</th>
-	            <th>h-index</th>
+	            <th>h3 Index</th>
 	        </tr>	        
 	    </thead>
 	    <tbody>
@@ -76,7 +78,7 @@
 	        </tr>
 	    </tbody>
 	</table>
-	<h3>h-indexed Articles</h3>
+	<h4>h-indexed Articles</h4>
 	<table class="table" id='top'>
 		<thead>
 			<th>Article</th>
@@ -142,14 +144,11 @@
 		 limit
 		].join(" ");	
 		url=endpoint+'?query='+encodeURIComponent(query) +"&format=json";
-		console.log(url)
 			return $.ajax({
 				url: url,
 				method: 'GET'
 			}).then(function(data) {
 				journal=data['results']['bindings'][0];
-				console.log(document.getElementById('journals_table'))			
-				console.log(journal)
 				title=journal['title']['value'];
 				publisher=journal['publishers']['value'];
 				count_documents['total']=journal['docs']['value'];		
@@ -170,12 +169,11 @@
 				document.getElementById('total_citations').innerHTML = count_citation['total']
 				document.getElementById('total_impact').innerHTML = impact['total']		
 				document.getElementById('total_h').innerHTML = h;
-			$(".loader").hide();
 			});
 		};
 
-	function cross(cursor){
-		url='http://api.crossref.org/journals/'+issn+'/works?rows=1000&filter=from-pub-date:2014,until-pub-date:2016&cursor='+encodeURIComponent(cursor)
+	function articles(){
+		url='http://api.crossref.org/journals/'+issn+'/works?rows=10&filter=from-pub-date:2014,until-pub-date:2016&sort=is-referenced-by-count'
 		//console.log(url)
 		$.ajax({
 		  	url: url,
@@ -193,76 +191,26 @@
 						yearo=item['published-online']['date-parts'][0][0]
 					}
 					year=Math.min(yearp,yearo)
-					year_dic[doi]=year
-					cites[year].push(cite)
-					//if ('author' in item | 1){citable_documents[year]++;	}
-					dic[doi]=cite
-					title[doi]=item['title']
+					title=item['title']
+					document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+doi+' target="_blank">' +title+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
 				});
-				total_documents_3years=0
-				cites_3years=[]
-				for (var year = 2014; year < 2017; year++) {
-					console.log(year)
-					if (cites[year].length>0){
-					total_documents[year]=cites[year].length
 
-						total_documents_3years+=total_documents[year]
-						cites_3years=cites_3years.concat(cites[year])
-						total_citations=cites[year].reduce(function(sum, value) {return sum + value}, 0);
-
-						if (total_documents[year]>0){
-						impact=total_citations/total_documents[year];
-						}else impact=0;
-						document.getElementById(year+'_articles').innerHTML = total_documents[year]	
-						document.getElementById(year+'_citations').innerHTML = total_citations;
-						document.getElementById(year+'_impact').innerHTML = impact.toFixed(2);	
-
-						total_citations_3years=cites_3years.reduce(function(a, b){ return a + b;},0);
-						if (total_documents_3years){
-						impact_3years=total_citations_3years/total_documents_3years;
-						}else impact_3years=0;
-						
-						document.getElementById('citable_articles').innerHTML = total_documents_3years;
-						document.getElementById('total_citations').innerHTML = total_citations_3years;
-						document.getElementById('total_impact').innerHTML = impact_3years.toFixed(2);
-					}
-				}	
-				next_cursor=data['message']['next-cursor']
-				if (next_cursor!=cursor){
-					return cross(next_cursor)
-				}
 			}
 		});
 	}
 	$(document).ready(function () {
-		issn=getParameterByName('issn');
-		docs=parseInt(getParameterByName('documents'));
-		//years=['2014','2015','2016'];
-		total_documents_3years=0
-		cites_3years=[]
-		dic={}
+		issn=getParameterByName('issn');document.getElementById('issn').innerHTML += issn	
+		title=getParameterByName('title');document.getElementById('title').innerHTML = title	
+		publisher=getParameterByName('publisher');document.getElementById('publisher').innerHTML += publisher	
+
 		count_documents={}
 		count_citation={}
 		impact={}
-		cites={};cites[2014]=[];cites[2015]=[];cites[2016]=[]
-		total_documents={2014:0,2015:0,2016:0}
-		title={}
-		year_dic={}
 
-
-		//years.forEach(function(year){
-		docs=1000
-		years=['2014']
-		cursor='*'
-		//cursor=cross(cursor)
+		articles()
 		get_journal(issn)
 
 		$(document).ajaxStop(function () {
-			sorted_dois = Object.keys(dic).sort(function(a,b){return dic[b]-dic[a]}).slice(0, h);
-			sorted_dois.forEach(function(sorted_doi){
-				document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+sorted_doi+' target="_blank">' +title[sorted_doi]+'</td><td>'+year_dic[sorted_doi]+'</td><td>'+dic[sorted_doi]+'</td></tr>'
-			});
-
 		$(".loader").hide();
 		});
 	});
