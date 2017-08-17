@@ -35,7 +35,8 @@
 		<br></br>
 		<br></br>
 		<div align="center" class="starter-template"><h1>Scholarly Journals Database</h1><h5>Based on <a href="https://www.crossref.org/" target="_blank">CrossRef</a> data & publication years 2014 to 2016</h4>
-		<h5>47,479 Journals - 12 Million Articles - 36 Million Citations (August 2017) </h5></div>
+		<h5>50,100 Journals - 9 Million Articles - 36 Million Citations (August 2017)
+		\ </h5></div>
 		<br>
 
 		  <div class="form-group">	
@@ -61,7 +62,7 @@
 			</tbody>
 		</table>
 		<div class="loader"></div>
-		<button id="load_more" class="btn btn-link" type="submit" onclick="find_journals(20);">Load more (click and wait)</button>
+		<button id="load_more" class="btn btn-link" type="submit" onclick="find_journals(offset_global);">Load more (click and wait)</button>
 
 	<footer>
 	  <br>
@@ -75,10 +76,12 @@
 		$('#user_input').keypress(function(e){
 		  if(e.keyCode==13)
 		  find_journals(0);
-		});		
+		});	
+		offset_global=20
 	});
 	//$("#user_input").on('change keyup paste', find_journals);
 	function find_journals(offset){
+	offset_global=offset+20
 	endpoint='http://brdb.warrington.ufl.edu:3030/test11/query';
 	search=document.getElementById("user_input").value;
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
@@ -100,6 +103,7 @@
 	 limit,
 	 'OFFSET '+ offset.toString()
 	].join(" ");	
+	console.log(query)
 		url=endpoint+'?query='+encodeURIComponent(query) +"&format=json";
 			return $.ajax({
 				url: url,
@@ -108,7 +112,9 @@
 				journals=data['results']['bindings'];
 				if (offset==0){ document.getElementById('journals_table').innerHTML=''}
 				journals.forEach(function(journal){
-					title=journal['title']['value'];
+					if ('title' in journal){
+						title=journal['title']['value'];
+					}
 					publisher=journal['publishers']['value'];
 					issn=journal['s']['value'].slice(-9);		
 					docs=journal['docs']['value'];		
