@@ -83,7 +83,7 @@
 	function find_journals(offset){
 	offset_global=offset+20
 	endpoint='http://brdb.warrington.ufl.edu:3030/test11/query';
-	search=document.getElementById("user_input").value;
+	search=document.getElementById("user_input").value.toLowerCase();
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
 	limit='limit 20';
 	var query = [
