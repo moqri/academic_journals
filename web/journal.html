@@ -38,6 +38,7 @@
 		<h3 id=title></h3>
 		<p id=publisher>Publisher: </p>
 		<p id=issn> ISSN: </p>
+		<p id=subject> Subject: </p>
 		<br>
 		<h4>Impact</h4>
 		<table class="table" id="data-table">
@@ -46,7 +47,7 @@
 		            <th>Year</th>
 		            <th>Citable Documents</th>
 		            <th>Citations</th>
-		            <th>Impact (Articles/Citations)</th>
+		            <th>Impact (Citations/Articles)</th>
 		            <th>h3 Index</th>
 		        </tr>	        
 		    </thead>
@@ -118,10 +119,10 @@
 	}
 
 	function get_journal(issn){
-		base='http://brdb.warrington.ufl.edu:3030/test11/'
+		base='http://brdb.warrington.ufl.edu:3030/test14/'
 		s='<'+base+issn+'>'
 		endpoint=base+'query'
-		limit='limit 100';
+		limit='limit 1000';
 		var query = [
 		 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
 		 "select DISTINCT ?s ?title ",
@@ -129,10 +130,11 @@
 		 "?docs_5 ?citation_5 (xsd:decimal(?impact_float_5) AS ?impact_5) ",
 		 "?docs_6 ?citation_6 (xsd:decimal(?impact_float_6) AS ?impact_6) ",
 		 "?docs   ?citation   (xsd:decimal(?impact_float) AS ?impact) ",
-		 "?h (group_concat(?publisher) as ?publishers)",
+		 "?h ?publisher (group_concat(?subjects;separator=' - ') as ?subject)",
 		 "WHERE {",
 			s,
 			" <e:title> ?title;",
+			"<e:subjects> ?subjects;",
 			"<e:publisher> ?publisher;",
 			"<e:count_4> ?docs_4; <e:citation_4> ?citation_4; <e:impact_4> ?impact_float_4;",
 			"<e:count_5> ?docs_5; <e:citation_5> ?citation_5; <e:impact_5> ?impact_float_5;",
@@ -142,13 +144,13 @@
 			"<e:impact> ?impact_float;",
 			"<e:h> ?h;",
 		 "}",
-		 "group by ?s ?title ",
+		 "group by ?s ?title ?publisher",
 		 "?docs_4 ?citation_4 ?impact_float_4 ",
 		 "?docs_5 ?citation_5 ?impact_float_5 ",
 		 "?docs_6 ?citation_6 ?impact_float_6 ",
 		 "?docs ?citation ?impact_float ?h ",
 		 "ORDER BY DESC(?h)",
-		 limit
+		 limit 
 		].join(" ");	
 		url=endpoint+'?query='+encodeURIComponent(query) +"&format=json";
 			return $.ajax({
@@ -157,7 +159,11 @@
 			}).then(function(data) {
 				journal=data['results']['bindings'][0];
 				title=journal['title']['value'];
-				publisher=journal['publishers']['value'];
+				subject=journal['subject']['value'];
+				console.log(url)
+				console.log(journal)
+				//console.log(subjects)
+				//publisher=journal['publisher']['value'];
 				count_documents['total']=parseInt(journal['docs']['value']);		
 				count_citation['total']=parseInt(journal['citation']['value']);		
 				impact['total']=journal['impact']['value'];		
@@ -176,12 +182,14 @@
 				document.getElementById('total_citations').innerHTML = count_citation['total'].toLocaleString()
 				document.getElementById('total_impact').innerHTML = impact['total']		
 				document.getElementById('total_h').innerHTML = h;
+				document.getElementById('subject').innerHTML += subject
+
+
 			});
 		};
 
 	function list_documents(){
 		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:2014,until-pub-date:2016&sort=is-referenced-by-count'+'&offset='+offset.toString()
-		//console.log(url)
 		$.ajax({
 		  	url: url,
 		  	method: 'GET',

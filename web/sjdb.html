@@ -54,7 +54,7 @@
 					<th>Publisher</th>
 					<th>Citable Documents</th>
 					<th>Total Citations</th>
-					<th>Citation/Document</th>
+					<th>Citations/Documents</th>
 					<th>h3 Index</th>
 				</tr>	        
 			</thead>
@@ -82,13 +82,13 @@
 	//$("#user_input").on('change keyup paste', find_journals);
 	function find_journals(offset){
 	offset_global=offset+20
-	endpoint='http://brdb.warrington.ufl.edu:3030/test11/query';
+	endpoint='http://brdb.warrington.ufl.edu:3030/test14/query';
 	search=document.getElementById("user_input").value.toLowerCase();
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
 	limit='limit 20';
 	var query = [
 	 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
-	 "select DISTINCT ?s ?title ?docs ?citation (xsd:decimal(?impact_) AS ?impact) ?h (group_concat(?publisher) as ?publishers)",
+	 "select DISTINCT ?s ?title ?docs ?citation (xsd:decimal(?impact_) AS ?impact) ?h ?publisher",
 	 "WHERE {",
 		"?s <e:title> ?title;",
 		"<e:publisher> ?publisher;",
@@ -98,7 +98,6 @@
 		"<e:h> ?h;",
 		filter,
 	 "}",
-	 "group by ?s ?title ?docs ?citation ?impact_ ?h ",
 	 "ORDER BY DESC(?h)",
 	 limit,
 	 'OFFSET '+ offset.toString()
@@ -115,7 +114,7 @@
 					if ('title' in journal){
 						title=journal['title']['value'];
 					}
-					publisher=journal['publishers']['value'];
+					publisher=journal['publisher']['value'];
 					issn=journal['s']['value'].slice(-9);		
 					docs=journal['docs']['value'];		
 					citation=journal['citation']['value'];		
