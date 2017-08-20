@@ -39,6 +39,43 @@
 		</div>
 		<br>
 
+		<select id="subject_category">
+		  	<option selected value="base">Please Select</option>
+			<option value="Agricultural and Biological Sciences">Agricultural and Biological Sciences</option>
+			<option value="Arts and Humanities">Arts and Humanities</option>
+			<option value="Biochemistry, Genetics and Molecular Biology">Biochemistry, Genetics and Molecular Biology</option>
+			<option value="Business, Management and Accounting">Business, Management and Accounting</option>
+			<option value="Chemical Engineering">Chemical Engineering</option>
+			<option value="Chemistry">Chemistry</option>
+			<option value="Computer Science">Computer Science</option>
+			<option value="Decision Sciences">Decision Sciences</option>
+			<option value="Dentistry">Dentistry</option>
+			<option value="Earth and Planetary Sciences">Earth and Planetary Sciences</option>
+			<option value="Economics, Econometrics and Finance">Economics, Econometrics and Finance</option>
+			<option value="Energy">Energy</option>
+			<option value="Engineering">Engineering</option>
+			<option value="Environmental Science">Environmental Science</option>
+			<option value="General">General</option>
+			<option value="Health Professions">Health Professions</option>
+			<option value="Immunology and Microbiology">Immunology and Microbiology</option>
+			<option value="Materials Science">Materials Science</option>
+			<option value="Mathematics">Mathematics</option>
+			<option value="Medicine">Medicine</option>
+			<option value="Neuroscience">Neuroscience</option>
+			<option value="Nursing">Nursing</option>
+			<option value="Pharmacology, Toxicology and Pharmaceutics">Pharmacology, Toxicology and Pharmaceutics</option>
+			<option value="Physics and Astronomy">Physics and Astronomy</option>
+			<option value="Psychology">Psychology</option>
+			<option value="Social Sciences">Social Sciences</option>
+			<option value="veterinary">veterinary</option>
+		</select>
+
+		<br>
+
+		<select id="category">
+		  <option>Please choose from above</option>
+		</select>
+
 		  <div class="form-group">	
 			<label><b>Search Journal Name</b></label>
 			<input class="form-control" type="text" id="user_input"> 
@@ -72,6 +109,111 @@
 
 	<script>
 	$(document).ready(function() {
+
+$("#subject_category").change(function() {
+
+	var $dropdown = $(this);
+
+	$.getJSON("cats.json", function(data) {
+
+		var key = $dropdown.val();
+		var vals = [];
+							
+		switch(key) {
+			case "Agricultural and Biological Sciences":
+				vals = data["Agricultural and Biological Sciences"].split(",");
+				break;
+			case "Arts and Humanities":
+				vals = data["Arts and Humanities"].split(",");
+				break;
+			case "Biochemistry, Genetics and Molecular Biology":
+				vals = data["Biochemistry, Genetics and Molecular Biology"].split(",");
+				break;
+			case "Business, Management and Accounting":
+				vals = data["Business, Management and Accounting"].split(",");
+				break;
+			case "Chemical Engineering":
+				vals = data["Chemical Engineering"].split(",");
+				break;
+			case "Chemistry":
+				vals = data["Chemistry"].split(",");
+				break;
+			case "Computer Science":
+				vals = data["Computer Science"].split(",");
+				break;
+			case "Decision Sciences":
+				vals = data["Decision Sciences"].split(",");
+				break;
+			case "Dentistry":
+				vals = data["Dentistry"].split(",");
+				break;
+			case "Earth and Planetary Sciences":
+				vals = data["Earth and Planetary Sciences"].split(",");
+				break;
+			case "Economics, Econometrics and Finance":
+				vals = data["Economics, Econometrics and Finance"].split(",");
+				break;
+			case "Energy":
+				vals = data["Energy"].split(",");
+				break;
+			case "Engineering":
+				vals = data["Engineering"].split(",");
+				break;
+			case "Environmental Science":
+				vals = data["Environmental Science"].split(",");
+				break;
+			case "General":
+				vals = data["General"].split(",");
+				break;
+			case "Health Professions":
+				vals = data["Health Professions"].split(",");
+				break;
+			case "Immunology and Microbiology":
+				vals = data["Immunology and Microbiology"].split(",");
+				break;
+			case "Materials Science":
+				vals = data["Materials Science"].split(",");
+				break;
+			case "Mathematics":
+				vals = data["Mathematics"].split(",");
+				break;
+			case "Medicine":
+				vals = data["Medicine"].split(",");
+				break;
+			case "Neuroscience":
+				vals = data["Neuroscience"].split(",");
+				break;
+			case "Nursing":
+				vals = data["Nursing"].split(",");
+				break;
+			case "Pharmacology, Toxicology and Pharmaceutics":
+				vals = data["Pharmacology, Toxicology and Pharmaceutics"].split(",");
+				break;
+			case "Physics and Astronomy":
+				vals = data["Physics and Astronomy"].split(",");
+				break;
+			case "Psychology":
+				vals = data["Psychology"].split(",");
+				break;
+			case "Social Sciences":
+				vals = data["Social Sciences"].split(",");
+				break;
+			case "veterinary":
+				vals = data["veterinary"].split(",");
+				break;
+			case 'base':
+				vals = ['Please choose from above'];
+		}
+		
+		var $secondChoice = $("#category");
+		$secondChoice.empty();
+		$.each(vals, function(index, value) {
+			$secondChoice.append("<option>" + value + "</option>");
+		});
+
+	});
+});
+
 		find_journals(0)
 		$('#user_input').keypress(function(e){
 		  if(e.keyCode==13)
@@ -85,6 +227,12 @@
 	endpoint='http://brdb.warrington.ufl.edu:3030/test14/query';
 	search=document.getElementById("user_input").value.toLowerCase();
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
+	subject=$("#category").find(":selected").text();
+	if (subject!='Please choose from above'){
+		filter="<e:subjects> '"+subject+"' " + filter
+	}
+
+	console.log(subject)
 	limit='limit 20';
 	var query = [
 	 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
