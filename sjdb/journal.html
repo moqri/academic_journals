@@ -53,25 +53,25 @@
 		    </thead>
 		    <tbody>
 		        <tr>
-					<td>2014</td>
+					<td><a href='#' id='2014'>2014</td>
 					<td id='4_articles'></td>
 					<td id='4_citations'></td>
 					<td id='4_impact'></td>
 		        </tr>
 		        <tr>
-					<td>2015</td>
+					<td><a href='#' id='2015'>2015</td>
 					<td id='5_articles'></td>
 					<td id='5_citations'></td>
 					<td id='5_impact'></td>
 		        </tr>
 		        <tr>
-		        	<td>2016</td>
+					<td><a href='#' id='2016'>2016</td>
 					<td id='6_articles'></td>
 					<td id='6_citations'></td>
 					<td id='6_impact'></td>
 		        </tr>
 		        <tr>
-		        	<td>3-year</td>
+					<td><a href='#' id='3-year'>3-year</td>
 					<td><b><p id='citable_articles'></p></b></td>
 					<td><b><P id='total_citations'></p></b></td>
 					<td><b><p id='total_impact'></p></b></td>
@@ -89,7 +89,7 @@
 			</thead>
 		</table>
 		<div class="loader"></div>
-		<button id="load_more" class="btn btn-link" type="submit" onclick="list_documents();">Load more (click and wait)</button>
+		<button id="load_more" class="btn btn-link" type="submit" onclick="list_documents(offset_from_year,offset_until_year,offset_global);">Load more</button>
 
 		<footer>
 		  <br>
@@ -191,8 +191,13 @@
 			});
 		};
 
-	function list_documents(){
-		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:2014,until-pub-date:2016&sort=is-referenced-by-count'+'&offset='+offset.toString()
+	function list_documents(from_year,until_year,offset){
+		$(".loader").show()
+		offset_global=offset+20
+		offset_from_year=from_year
+		offset_until_year=until_year
+		if (offset==0){ document.getElementById('top').innerHTML=''}
+		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:'+(from_year).toString()+',until-pub-date:'+(until_year).toString()+'&sort=is-referenced-by-count'+'&offset='+offset.toString()
 		$.ajax({
 		  	url: url,
 		  	method: 'GET',
@@ -209,14 +214,17 @@
 						yearo=item['published-online']['date-parts'][0][0]
 					}
 					year=Math.min(yearp,yearo)
-					title=item['title']
+					title=item['title']					
 					document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+doi+'>' +title+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
 				});
-			offset+=20
 			}
 		});
 	}
 	$(document).ready(function () {
+		$('#2014').click(function(){ list_documents(2014,2014,0); return false; });
+		$('#2015').click(function(){ list_documents(2015,2015,0); return false; });
+		$('#2016').click(function(){ list_documents(2016,2016,0); return false; });
+		$('#3-year').click(function(){ list_documents(2014,2016,0); return false; });
 		issn=getParameterByName('issn');document.getElementById('issn').innerHTML += issn	
 		title=getParameterByName('title');document.getElementById('title').innerHTML = title	
 		publisher=getParameterByName('publisher');document.getElementById('publisher').innerHTML += publisher	
@@ -225,7 +233,7 @@
 		count_citation={}
 		impact={}
 		offset=0
-		list_documents()
+		list_documents(2014,2016,0)
 		get_journal(issn)
 
 		$(document).ajaxStop(function () {

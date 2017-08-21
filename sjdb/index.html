@@ -104,7 +104,7 @@
 		</tbody>
 	</table>
 	<div class="loader"></div>
-	<button id="load_more" class="btn btn-link" type="submit" onclick="find_journals(offset_global);">Load more (click and wait)</button>
+	<button id="load_more" class="btn btn-link" type="submit" onclick="find_journals(offset_global);">Load more</button>
 	<footer>
 	  <br>
 	  <p></p>
@@ -259,6 +259,7 @@
 	});
 
 	function find_journals(offset){
+	$(".loader").show()
 	offset_global=offset+20
 	endpoint='http://brdb.warrington.ufl.edu:3030/test14/query';
 	search=document.getElementById("user_input").value.toLowerCase();
