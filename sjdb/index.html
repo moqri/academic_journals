@@ -117,14 +117,15 @@
 		subject_param=getParameterByName('subject')
 		
 		var data = JSON.parse(cats_dict);
-		console.log(data)
-
+		
 		$('#user_input').keypress(function(e){
 		  if(e.keyCode==13)
 		  find_journals(0);
 		});			
 
 		subject_category=document.getElementById("subject_category")
+
+		selected_category=$('#subject_category').find(":selected").text();	
 		subject_category.addEventListener('change',(function() {
 			var $dropdown = $(this);
 			var key = $dropdown.val();
@@ -236,6 +237,11 @@
 
 		}))
 
+		if (selected_category!='Please Select'){
+			var event = new Event('change');
+			subject_category.dispatchEvent(event);
+		}		
+		
 		if (!subject_param){
 			find_journals(0)
 		}else{
