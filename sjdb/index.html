@@ -8,6 +8,8 @@
     <title>Scholarly Journals Database</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script type="text/javascript" src="cats.json"></script>
+	
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link rel = "stylesheet" type = "text/css" href = "css/style.css">
   </head>
@@ -38,9 +40,12 @@
 		<h5>50,100 Journals - 9 Million Articles - 36 Million Citations (August 2017)</h5>
 		</div>
 		<br>
-
-		<select id="subject_category">
-		  	<option selected value="base">Please Select</option>
+		
+	<div class="row">
+	  <div class="col-sm-4">
+		<label><b>Category</b></label> 
+		<select class="form-control" id="subject_category">
+			<option selected value="base">Please Select</option>
 			<option value="Agricultural and Biological Sciences">Agricultural and Biological Sciences</option>
 			<option value="Arts and Humanities">Arts and Humanities</option>
 			<option value="Biochemistry, Genetics and Molecular Biology">Biochemistry, Genetics and Molecular Biology</option>
@@ -69,170 +74,199 @@
 			<option value="Social Sciences">Social Sciences</option>
 			<option value="veterinary">veterinary</option>
 		</select>
+	  </div>
+	  <div class="col-sm-4">
+		<label><b>Subject</b></label>  
+		<select class="form-control" id="subject">
+		  <option>Please select a category first</option>
+		</select>  
+	  </div>
+	  <div class="col-sm-4">
+		<label><b>Filter by Journal Name</b></label>
+		<input class="form-control" type="text" id="user_input"> 
+	  </div>  
+	</div>
+	<br><br>
 
-		<br>
-
-		<select id="category">
-		  <option>Please choose from above</option>
-		</select>
-
-		  <div class="form-group">	
-			<label><b>Search Journal Name</b></label>
-			<input class="form-control" type="text" id="user_input"> 
-		  </div>			
-			<input class="btn btn-default" type="submit" onclick="find_journals(0);">
-		<br></br>
-
-		<h3>Journals</h3>
-		<table class="table">
-			<thead>
-				<tr>
-					<th>Title</th>
-					<th>Publisher</th>
-					<th>Citable Documents</th>
-					<th>Total Citations</th>
-					<th>Citations/Documents</th>
-					<th>h3 Index</th>
-				</tr>	        
-			</thead>
-			<tbody id="journals_table">
-			</tbody>
-		</table>
-		<div class="loader"></div>
-		<button id="load_more" class="btn btn-link" type="submit" onclick="find_journals(offset_global);">Load more (click and wait)</button>
-
+	<h4 id='journals'>Journals</h4>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Title</th>
+				<th>Publisher</th>
+				<th>Articles</th>
+				<th>Citations</th>
+				<th>Impact (Citations/Articles)</th>
+				<th>h3 Index</th>
+			</tr>	        
+		</thead>
+		<tbody id="journals_table">
+		</tbody>
+	</table>
+	<div class="loader"></div>
+	<button id="load_more" class="btn btn-link" type="submit" onclick="find_journals(offset_global);">Load more (click and wait)</button>
 	<footer>
 	  <br>
 	  <p></p>
 	</footer>
 	</div>
 
-	<script>
+	<script>	
 	$(document).ready(function() {
-
-$("#subject_category").change(function() {
-
-	var $dropdown = $(this);
-
-	$.getJSON("cats.json", function(data) {
-
-		var key = $dropdown.val();
-		var vals = [];
-							
-		switch(key) {
-			case "Agricultural and Biological Sciences":
-				vals = data["Agricultural and Biological Sciences"].split(";");
-				break;
-			case "Arts and Humanities":
-				vals = data["Arts and Humanities"].split(";");
-				break;
-			case "Biochemistry, Genetics and Molecular Biology":
-				vals = data["Biochemistry, Genetics and Molecular Biology"].split(";");
-				break;
-			case "Business, Management and Accounting":
-				vals = data["Business, Management and Accounting"].split(";");
-				break;
-			case "Chemical Engineering":
-				vals = data["Chemical Engineering"].split(";");
-				break;
-			case "Chemistry":
-				vals = data["Chemistry"].split(";");
-				break;
-			case "Computer Science":
-				vals = data["Computer Science"].split(";");
-				break;
-			case "Decision Sciences":
-				vals = data["Decision Sciences"].split(";");
-				break;
-			case "Dentistry":
-				vals = data["Dentistry"].split(";");
-				break;
-			case "Earth and Planetary Sciences":
-				vals = data["Earth and Planetary Sciences"].split(";");
-				break;
-			case "Economics, Econometrics and Finance":
-				vals = data["Economics, Econometrics and Finance"].split(";");
-				break;
-			case "Energy":
-				vals = data["Energy"].split(";");
-				break;
-			case "Engineering":
-				vals = data["Engineering"].split(";");
-				break;
-			case "Environmental Science":
-				vals = data["Environmental Science"].split(";");
-				break;
-			case "General":
-				vals = data["General"].split(";");
-				break;
-			case "Health Professions":
-				vals = data["Health Professions"].split(";");
-				break;
-			case "Immunology and Microbiology":
-				vals = data["Immunology and Microbiology"].split(";");
-				break;
-			case "Materials Science":
-				vals = data["Materials Science"].split(";");
-				break;
-			case "Mathematics":
-				vals = data["Mathematics"].split(";");
-				break;
-			case "Medicine":
-				vals = data["Medicine"].split(";");
-				break;
-			case "Neuroscience":
-				vals = data["Neuroscience"].split(";");
-				break;
-			case "Nursing":
-				vals = data["Nursing"].split(";");
-				break;
-			case "Pharmacology, Toxicology and Pharmaceutics":
-				vals = data["Pharmacology, Toxicology and Pharmaceutics"].split(";");
-				break;
-			case "Physics and Astronomy":
-				vals = data["Physics and Astronomy"].split(";");
-				break;
-			case "Psychology":
-				vals = data["Psychology"].split(";");
-				break;
-			case "Social Sciences":
-				vals = data["Social Sciences"].split(";");
-				break;
-			case "veterinary":
-				vals = data["veterinary"].split(";");
-				break;
-			case 'base':
-				vals = ['Please choose from above'];
-		}
+		//subject_param=''
+		subject_param=getParameterByName('subject')
 		
-		var $secondChoice = $("#category");
-		$secondChoice.empty();
-		$.each(vals, function(index, value) {
-			$secondChoice.append("<option>" + value + "</option>");
-		});
+		var data = JSON.parse(cats_dict);
 
-	});
-});
-
-		find_journals(0)
 		$('#user_input').keypress(function(e){
 		  if(e.keyCode==13)
 		  find_journals(0);
-		});	
-		offset_global=20
+		});			
+
+		subject_category=document.getElementById("subject_category")
+		subject_category.addEventListener('change',(function() {
+			var $dropdown = $(this);
+			var key = $dropdown.val();
+			var vals = [];								
+			switch(key) {
+				case "Agricultural and Biological Sciences":
+					vals = data["Agricultural and Biological Sciences"].split(";");
+					break;
+				case "Arts and Humanities":
+					vals = data["Arts and Humanities"].split(";");
+					break;
+				case "Biochemistry, Genetics and Molecular Biology":
+					vals = data["Biochemistry, Genetics and Molecular Biology"].split(";");
+					break;
+				case "Business, Management and Accounting":
+					vals = data["Business, Management and Accounting"].split(";");
+					break;
+				case "Chemical Engineering":
+					vals = data["Chemical Engineering"].split(";");
+					break;
+				case "Chemistry":
+					vals = data["Chemistry"].split(";");
+					break;
+				case "Computer Science":
+					vals = data["Computer Science"].split(";");
+					break;
+				case "Decision Sciences":
+					vals = data["Decision Sciences"].split(";");
+					break;
+				case "Dentistry":
+					vals = data["Dentistry"].split(";");
+					break;
+				case "Earth and Planetary Sciences":
+					vals = data["Earth and Planetary Sciences"].split(";");
+					break;
+				case "Economics, Econometrics and Finance":
+					vals = data["Economics, Econometrics and Finance"].split(";");
+					break;
+				case "Energy":
+					vals = data["Energy"].split(";");
+					break;
+				case "Engineering":
+					vals = data["Engineering"].split(";");
+					break;
+				case "Environmental Science":
+					vals = data["Environmental Science"].split(";");
+					break;
+				case "General":
+					vals = data["General"].split(";");
+					break;
+				case "Health Professions":
+					vals = data["Health Professions"].split(";");
+					break;
+				case "Immunology and Microbiology":
+					vals = data["Immunology and Microbiology"].split(";");
+					break;
+				case "Materials Science":
+					vals = data["Materials Science"].split(";");
+					break;
+				case "Mathematics":
+					vals = data["Mathematics"].split(";");
+					break;
+				case "Medicine":
+					vals = data["Medicine"].split(";");
+					break;
+				case "Neuroscience":
+					vals = data["Neuroscience"].split(";");
+					break;
+				case "Nursing":
+					vals = data["Nursing"].split(";");
+					break;
+				case "Pharmacology, Toxicology and Pharmaceutics":
+					vals = data["Pharmacology, Toxicology and Pharmaceutics"].split(";");
+					break;
+				case "Physics and Astronomy":
+					vals = data["Physics and Astronomy"].split(";");
+					break;
+				case "Psychology":
+					vals = data["Psychology"].split(";");
+					break;
+				case "Social Sciences":
+					vals = data["Social Sciences"].split(";");
+					break;
+				case "veterinary":
+					vals = data["veterinary"].split(";");
+					break;
+				case 'base':
+					vals = ['Please select a category first'];
+			}				
+			var $secondChoice = $("#subject");
+			$secondChoice.empty();
+			$.each(vals, function(index, value) {
+				$secondChoice.append("<option>" + value + "</option>");
+			});
+			if (!subject_param){
+				find_journals(0)
+			}	
+			selected_category=$('#subject_category').find(":selected").text();
+			selected_subject=$('#subject').find(":selected").text();
+			$("#journals").text('Journals > '+ selected_category + ' > ' + selected_subject)
+		}));
+
+		subject=document.getElementById("subject")
+		subject.addEventListener('change',(function() {
+			find_journals(0)
+			selected_category=$('#subject_category').find(":selected").text();
+			selected_subject=$('#subject').find(":selected").text();
+			$("#journals").text('Journals > '+ selected_category + ' > ' + selected_subject)
+
+		}))
+
+		if (!subject_param){
+			find_journals(0)
+		}else{
+			for (cat in data){
+				subjects=(data[cat]).split(';')			
+				for (i = 0; i < subjects.length; i++){
+					if (subjects[i]==subject_param){
+						subject_category_param=cat
+						console.log(subject_category_param)
+					}
+				}
+			}
+			$("#subject_category").val(subject_category_param)
+			var event = new Event('change');
+			subject_category.dispatchEvent(event);
+			
+			$("#subject").val(subject_param)	
+			subject.dispatchEvent(event);
+			subject_param=null			
+		}		
 	});
-	//$("#user_input").on('change keyup paste', find_journals);
+
 	function find_journals(offset){
 	offset_global=offset+20
 	endpoint='http://brdb.warrington.ufl.edu:3030/test14/query';
 	search=document.getElementById("user_input").value.toLowerCase();
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
-	subject=$("#category").find(":selected").text();
-	if (subject!='Please choose from above'){
-		filter="<e:subjects> '"+subject+"' " + filter
+	selected_subject=$("#subject").find(":selected").text();
+	if (selected_subject!='Please select a category first'){
+		filter="<e:subjects> '"+selected_subject+"' " + filter
 	}
 
-	console.log(subject)
 	limit='limit 20';
 	var query = [
 	 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
@@ -250,7 +284,6 @@ $("#subject_category").change(function() {
 	 limit,
 	 'OFFSET '+ offset.toString()
 	].join(" ");	
-	console.log(query)
 		url=endpoint+'?query='+encodeURIComponent(query) +"&format=json";
 			return $.ajax({
 				url: url,
@@ -273,7 +306,7 @@ $("#subject_category").change(function() {
 					<td><a href=journal.html?issn='+issn+
 					'&title='+encodeURIComponent(title)+
 					'&publisher='+encodeURIComponent(publisher)+
-					' target="_blank">'+title+'</td>\
+					'>'+title+'</td>\
 					<td>'+publisher+'</td>\
 					<td>'+docs+'</td>\
 					<td>'+citation+'</td>\
@@ -285,7 +318,17 @@ $("#subject_category").change(function() {
 			});
 		};
 
-		</script>
+	function getParameterByName(name, url) {
+	    if (!url) url = window.location.href;
+	    name = name.replace(/[\[\]]/g, "\\$&");
+	    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+	        results = regex.exec(url);
+	    if (!results) return null;
+	    if (!results[2]) return '';
+	    return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}		
+		
+	</script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   </body>
 </html>

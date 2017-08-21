@@ -45,7 +45,7 @@
 		    <thead>
 		        <tr>
 		            <th>Year</th>
-		            <th>Citable Documents</th>
+		            <th>Articles</th>
 		            <th>Citations</th>
 		            <th>Impact (Citations/Articles)</th>
 		            <th>h3 Index</th>
@@ -130,7 +130,7 @@
 		 "?docs_5 ?citation_5 (xsd:decimal(?impact_float_5) AS ?impact_5) ",
 		 "?docs_6 ?citation_6 (xsd:decimal(?impact_float_6) AS ?impact_6) ",
 		 "?docs   ?citation   (xsd:decimal(?impact_float) AS ?impact) ",
-		 "?h ?publisher (group_concat(?subjects;separator=' - ') as ?subject)",
+		 "?h ?publisher (group_concat(?subjects;separator='-') as ?subject)",
 		 "WHERE {",
 			s,
 			" <e:title> ?title;",
@@ -159,11 +159,9 @@
 			}).then(function(data) {
 				journal=data['results']['bindings'][0];
 				title=journal['title']['value'];
-				subject=journal['subject']['value'];
+				subjects=journal['subject']['value'];
 				console.log(url)
 				console.log(journal)
-				//console.log(subjects)
-				//publisher=journal['publisher']['value'];
 				count_documents['total']=parseInt(journal['docs']['value']);		
 				count_citation['total']=parseInt(journal['citation']['value']);		
 				impact['total']=journal['impact']['value'];		
@@ -182,7 +180,12 @@
 				document.getElementById('total_citations').innerHTML = count_citation['total'].toLocaleString()
 				document.getElementById('total_impact').innerHTML = impact['total']		
 				document.getElementById('total_h').innerHTML = h;
-				document.getElementById('subject').innerHTML += subject
+				subject_list=subjects.split('-')
+				for (i=0; i<subject_list.length; i++){
+					subject=subject_list[i]
+					document.getElementById('subject').innerHTML += '<a href=index.html?subject='+encodeURI(subject)+'>'+subject+'</a> ; '
+				}
+				
 
 
 			});
@@ -207,7 +210,7 @@
 					}
 					year=Math.min(yearp,yearo)
 					title=item['title']
-					document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+doi+' target="_blank">' +title+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
+					document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+doi+'>' +title+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
 				});
 			offset+=20
 			}
