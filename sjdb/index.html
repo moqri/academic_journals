@@ -86,6 +86,7 @@
 		<input class="form-control" type="text" id="user_input"> 
 	  </div>  
 	</div>
+	<input type="text" id="hidden_subject" value="">
 	<br><br>
 
 	<h4 id='journals'>Journals</h4>
@@ -111,9 +112,10 @@
 	</footer>
 	</div>
 
-	<script>	
+	<script>
+	$("#hidden_subject").hide();	
 	$(document).ready(function() {
-		//subject_param=''
+
 		subject_param=getParameterByName('subject')
 		
 		var data = JSON.parse(cats_dict);
@@ -234,6 +236,11 @@
 			selected_category=$('#subject_category').find(":selected").text();
 			selected_subject=$('#subject').find(":selected").text();
 			$("#journals").text('Journals > '+ selected_category + ' > ' + selected_subject)
+			$("#hidden_subject").val(selected_subject)
+			hidden_subject=$("#hidden_subject").val()
+						console.log(hidden_subject)
+
+
 
 		}))
 
@@ -243,7 +250,14 @@
 		}		
 		
 		if (!subject_param){
-			find_journals(0)
+			hidden_subject=$("#hidden_subject").val()
+			console.log(hidden_subject)
+			if (hidden_subject!=''){
+				$("#subject").val(hidden_subject)
+				subject.dispatchEvent(event);
+			}else{//index
+				find_journals(0)
+			}
 		}else{
 			for (cat in data){
 				subjects=(data[cat]).split(';')			
