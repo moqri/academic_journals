@@ -119,7 +119,7 @@
 	}
 
 	function get_journal(issn){
-		base='http://brdb.warrington.ufl.edu:3030/test14/'
+		base='http://brdb.warrington.ufl.edu:3030/test15/'
 		s='<'+base+issn+'>'
 		endpoint=base+'query'
 		limit='limit 1000';
@@ -160,8 +160,6 @@
 				journal=data['results']['bindings'][0];
 				title=journal['title']['value'];
 				subjects=journal['subject']['value'];
-				console.log(url)
-				console.log(journal)
 				count_documents['total']=parseInt(journal['docs']['value']);		
 				count_citation['total']=parseInt(journal['citation']['value']);		
 				impact['total']=journal['impact']['value'];		
@@ -198,6 +196,7 @@
 		offset_until_year=until_year
 		if (offset==0){ document.getElementById('top').innerHTML=''}
 		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:'+(from_year).toString()+',until-pub-date:'+(until_year).toString()+'&sort=is-referenced-by-count'+'&offset='+offset.toString()
+		console.log(url)
 		$.ajax({
 		  	url: url,
 		  	method: 'GET',

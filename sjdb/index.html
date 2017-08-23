@@ -60,7 +60,7 @@
 			<option value="Energy">Energy</option>
 			<option value="Engineering">Engineering</option>
 			<option value="Environmental Science">Environmental Science</option>
-			<option value="General">General</option>
+			<option value="Multidisciplinary">Multidisciplinary</option>
 			<option value="Health Professions">Health Professions</option>
 			<option value="Immunology and Microbiology">Immunology and Microbiology</option>
 			<option value="Materials Science">Materials Science</option>
@@ -93,6 +93,7 @@
 	<table class="table">
 		<thead>
 			<tr>
+				<th>Open</th>
 				<th>Title</th>
 				<th>Publisher</th>
 				<th>Articles</th>
@@ -175,8 +176,8 @@
 				case "Environmental Science":
 					vals = data["Environmental Science"].split(";");
 					break;
-				case "General":
-					vals = data["General"].split(";");
+				case "Multidisciplinary":
+					vals = data["Multidisciplinary"].split(";");
 					break;
 				case "Health Professions":
 					vals = data["Health Professions"].split(";");
@@ -281,25 +282,26 @@
 	function find_journals(offset){
 	$(".loader").show()
 	offset_global=offset+20
-	endpoint='http://brdb.warrington.ufl.edu:3030/test14/query';
+	endpoint='http://brdb.warrington.ufl.edu:3030/test15/query';
 	search=document.getElementById("user_input").value.toLowerCase();
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
 	selected_subject=$("#subject").find(":selected").text();
 	if (selected_subject!='Please select a category first'){
-		filter="<e:subjects> '"+selected_subject+"' " + filter
+		filter="?s <e:subjects> '"+selected_subject+"' " + filter
 	}
 
 	limit='limit 20';
 	var query = [
 	 "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
-	 "select DISTINCT ?s ?title ?docs ?citation (xsd:decimal(?impact_) AS ?impact) ?h ?publisher",
+	 "select DISTINCT ?s ?title ?docs ?citation (xsd:decimal(?impact_) AS ?impact) ?h ?publisher ?open",
 	 "WHERE {",
 		"?s <e:title> ?title;",
 		"<e:publisher> ?publisher;",
 		"<e:count> ?docs;",
 		"<e:citation> ?citation;",
 		"<e:impact> ?impact_;",
-		"<e:h> ?h;",
+		"<e:h> ?h.",
+		" OPTIONAL {?s <e:open> ?open.}",
 		filter,
 	 "}",
 	 "ORDER BY DESC(?h)",
@@ -323,8 +325,15 @@
 					citation=journal['citation']['value'];		
 					impact=journal['impact']['value'];		
 					h=journal['h']['value'];		
+					if (journal['open']){
+						open='✓'		
+					}else{
+						open=''
+					}
+					
 							
 					document.getElementById('journals_table').innerHTML += '<tr>\
+					<td>'+open+'</td>\
 					<td><a href=journal.html?issn='+issn+
 					'&title='+encodeURIComponent(title)+
 					'&publisher='+encodeURIComponent(publisher)+
