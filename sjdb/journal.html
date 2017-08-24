@@ -195,15 +195,16 @@
 		offset_from_year=from_year
 		offset_until_year=until_year
 		if (offset==0){ document.getElementById('top').innerHTML=''}
-		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:'+(from_year).toString()+',until-pub-date:'+(until_year).toString()+'&sort=is-referenced-by-count'+'&offset='+offset.toString()
-		console.log(url)
+		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:'+(from_year).toString()+',until-pub-date:'+(until_year).toString()+'&sort=is-referenced-by-count'+'&offset='+offset.toString()		
+		dois=[]
 		$.ajax({
 		  	url: url,
 		  	method: 'GET',
 		  	success: function(data) {
-				items=data['message']['items'];
+				items=data['message']['items'];				
 				items.forEach(function(item) {
 					doi=item['DOI'];
+					dois.push(doi)
 					cite=item['is-referenced-by-count'];
 					yearp=yearo=9999
 					if ('published-print' in item){
@@ -213,11 +214,27 @@
 						yearo=item['published-online']['date-parts'][0][0]
 					}
 					year=Math.min(yearp,yearo)
-					title=item['title']					
-					document.getElementById('top').innerHTML += '<tr><td><a href=https://doi.org/'+doi+'>' +title+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
-				});
+					title=item['title']										
+					document.getElementById('top').innerHTML += '<tr><td id='+doi+'></td><td><a href=https://doi.org/'+doi+'>' +title+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
+				});	
+			},
+			complete: function (data){
+				dois.forEach(function(doi){
+					$.ajax({
+						url: 'https://api.oadoi.org/'+doi,
+						method: 'GET',
+						success: function(data) {							
+							open_link=data['results'][0]['free_fulltext_url']
+							if(open_link){
+								
+								document.getElementById(doi).innerHTML='<a href='+open_link+' target="_blank"><img border="0" alt="open" src="oa_logo.png" width="16" height="25"></a>'
+							}
+						}									
+					})					
+				})
 			}
 		});
+
 	}
 	$(document).ready(function () {
 		$('#2014').click(function(){ list_documents(2014,2014,0); return false; });
