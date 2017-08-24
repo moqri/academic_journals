@@ -43,7 +43,7 @@
 		
 	<div class="row">
 	  <div class="col-sm-4">
-		<label><b>Category</b></label> 
+		<label>Category</label> 
 		<select class="form-control" id="subject_category">
 			<option selected value="base">Please Select</option>
 			<option value="Agricultural and Biological Sciences">Agricultural and Biological Sciences</option>
@@ -76,16 +76,27 @@
 		</select>
 	  </div>
 	  <div class="col-sm-4">
-		<label><b>Subject</b></label>  
+		<label>Subject</label>  
 		<select class="form-control" id="subject">
 		  <option>Please select a category first</option>
 		</select>  
 	  </div>
 	  <div class="col-sm-4">
-		<label><b>Filter by Journal Name</b></label>
+		<label>Filter by Journal Name</label>
 		<input class="form-control" type="text" id="user_input"> 
 	  </div>  
 	</div>
+	<br>
+	<div class="row">	
+		<div class="form-check">
+			<div class="col-sm-4">
+				<label class="form-check-label">
+					<input class="form-check-input" type="checkbox" id="open_check"> Only Open Access Journals
+				</label> 
+			</div>
+		</div>
+	</div>
+
 	<input type="text" id="hidden_subject" value="">
 	<br><br>
 
@@ -118,18 +129,25 @@
 	$(document).ready(function() {
 
 		subject_param=getParameterByName('subject')
+		open_param=getParameterByName('open')
+		if (open_param){
+			document.getElementById("open_check").checked=true
+		}
 		
 		var data = JSON.parse(cats_dict);
 		
 		$('#user_input').keypress(function(e){
-		  if(e.keyCode==13)
-		  find_journals(0);
+			if(e.keyCode==13){
+				document.getElementById('journals_table').innerHTML=''
+				find_journals(0);
+			}
 		});			
 
 		subject_category=document.getElementById("subject_category")
 
 		selected_category=$('#subject_category').find(":selected").text();	
 		subject_category.addEventListener('change',(function() {
+			document.getElementById('journals_table').innerHTML=''
 			var $dropdown = $(this);
 			var key = $dropdown.val();
 			var vals = [];								
@@ -233,6 +251,7 @@
 
 		subject=document.getElementById("subject")
 		subject.addEventListener('change',(function() {
+			document.getElementById('journals_table').innerHTML=''
 			find_journals(0)
 			selected_category=$('#subject_category').find(":selected").text();
 			selected_subject=$('#subject').find(":selected").text();
@@ -240,10 +259,14 @@
 			$("#hidden_subject").val(selected_subject)
 			hidden_subject=$("#hidden_subject").val()
 						console.log(hidden_subject)
-
-
-
 		}))
+		
+		open_check=document.getElementById("open_check")
+		open_check.addEventListener('change',(function() {
+			document.getElementById('journals_table').innerHTML=''
+			find_journals(0)
+		}))
+
 
 		if (selected_category!='Please Select'){
 			var event = new Event('change');
@@ -287,7 +310,10 @@
 	filter=' filter(regex(lcase(?title),"'+search+'")) ';
 	selected_subject=$("#subject").find(":selected").text();
 	if (selected_subject!='Please select a category first'){
-		filter="?s <e:subjects> '"+selected_subject+"' " + filter
+		filter="?s <e:subjects> '"+selected_subject+"'. " + filter
+	}
+	if (document.getElementById("open_check").checked){
+		filter="?s <e:open> 1. "+filter
 	}
 
 	limit='limit 20';
