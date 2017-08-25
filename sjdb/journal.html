@@ -35,10 +35,10 @@
 
     <div class="container">	
 		<br><br><br>
-		<h3 id=title></h3>
-		<p id=publisher>Publisher: </p>
-		<p id=issn> ISSN: </p>
-		<p id=subject> Subject: </p>
+		<h3 id="title"></h3>
+		<p id="publisher">Publisher: </p>
+		<p id="issn"> ISSN: </p>
+		<p id="subject"> Subject: </p>
 		<br>
 		<h4>Impact</h4>
 		<table class="table" id="data-table">
@@ -83,12 +83,13 @@
 		<h4>Top Articles</h4>
 		<table class="table" id='top'>
 			<thead>
+				<th>Open</th>
 				<th>Article</th>
 				<th>Year</th>
 				<th>Citations</th>
 			</thead>
 		</table>
-		<div class="loader"></div>
+		<div class="loader" id="load_articles"></div>
 		<button id="load_more" class="btn btn-link" type="submit" onclick="list_documents(offset_from_year,offset_until_year,offset_global);">Load more</button>
 
 		<footer>
@@ -188,13 +189,12 @@
 
 			});
 		};
-
 	function list_documents(from_year,until_year,offset){
-		$(".loader").show()
+		$("#load_articles").show()	
 		offset_global=offset+20
 		offset_from_year=from_year
 		offset_until_year=until_year
-		if (offset==0){ document.getElementById('top').innerHTML=''}
+		if (offset==0){ document.getElementById('top').innerHTML='<thead><th>Open</th><th>Article</th><th>Year</th><th>Citations</th></thead>'}
 		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:'+(from_year).toString()+',until-pub-date:'+(until_year).toString()+'&sort=is-referenced-by-count'+'&offset='+offset.toString()		
 		dois=[]
 		$.ajax({
@@ -219,6 +219,7 @@
 				});	
 			},
 			complete: function (data){
+				$("#load_articles").hide();
 				dois.forEach(function(doi){
 					$.ajax({
 						url: 'https://api.oadoi.org/'+doi,
@@ -252,9 +253,6 @@
 		list_documents(2014,2016,0)
 		get_journal(issn)
 
-		$(document).ajaxStop(function () {
-		$(".loader").hide();
-		});
 	});
 </script>
 <script>
