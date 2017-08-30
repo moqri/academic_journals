@@ -297,6 +297,13 @@
 			}	
 			selected_category=$('#subject_category').find(":selected").text();
 			selected_subject=$('#subject').find(":selected").text();
+			if (selected_subject=='Marketing') {
+				top_articles('Marketing')
+				}else if (selected_subject=='Finance'){	
+				top_articles('Finance')	
+				}else{		
+				document.getElementById("articles_table_body").innerHTML=''
+				}
 			$("#path").text(selected_category + ' > ' + selected_subject)
 		}));
 
@@ -307,8 +314,10 @@
 			selected_category=$('#subject_category').find(":selected").text();
 			selected_subject=$('#subject').find(":selected").text();
 			if (selected_subject=='Marketing') {
-				top_articles()
-				}else{				
+				top_articles('Marketing')
+				}else if (selected_subject=='Finance'){	
+				top_articles('Finance')	
+				}else{		
 				document.getElementById("articles_table_body").innerHTML=''
 				}
 			$("#path").text(selected_category + ' > ' + selected_subject)
@@ -441,8 +450,8 @@
 	    return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}		
 		
-	function top_articles(){
-		$.getJSON("top_Marketing.json", function(top_articles) {
+	function top_articles(subject){
+		$.getJSON('top_'+subject+'.json', function(top_articles) {
 			var result = '';
 			for(var i=0; i<top_articles.length; i++) {			
 				result += "<tr>";
