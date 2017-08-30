@@ -300,10 +300,8 @@
 			}	
 			selected_category=$('#subject_category').find(":selected").text();
 			selected_subject=$('#subject').find(":selected").text();
-			if (selected_subject=='Marketing') {
-				top_articles('Marketing')
-				}else if (selected_subject=='Finance'){	
-				top_articles('Finance')	
+			if (['Marketing','Finance','Artificial Intelligence'].indexOf(selected_subject) > -1) {
+				top_articles(selected_subject)
 				}else{		
 				document.getElementById("articles_table_body").innerHTML=''
 				}
@@ -316,17 +314,15 @@
 			find_journals(0)
 			selected_category=$('#subject_category').find(":selected").text();
 			selected_subject=$('#subject').find(":selected").text();
-			if (selected_subject=='Marketing') {
-				top_articles('Marketing')
-				}else if (selected_subject=='Finance'){	
-				top_articles('Finance')	
+			console.log(['Marketing','Finance','Artificial Intelligence'].indexOf(selected_subject) > -1)
+			if (['Marketing','Finance','Artificial Intelligence'].indexOf(selected_subject) > -1) {
+				top_articles(selected_subject)
 				}else{		
 				document.getElementById("articles_table_body").innerHTML=''
 				}
 			$("#path").text(selected_category + ' > ' + selected_subject)
 			$("#hidden_subject").val(selected_subject)
 			hidden_subject=$("#hidden_subject").val()
-						console.log(hidden_subject)
 		}))
 		
 		open_check=document.getElementById("open_check")
@@ -343,7 +339,6 @@
 		
 		if (!subject_param){
 			hidden_subject=$("#hidden_subject").val()
-			console.log(hidden_subject)
 			if (hidden_subject!=''){
 				$("#subject").val(hidden_subject)
 				subject.dispatchEvent(event);
