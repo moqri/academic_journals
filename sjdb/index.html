@@ -133,7 +133,7 @@
 	<button id="load_more" class="btn btn-link" type="submit" onclick="find_journals(offset_global);">Load more</button>
     </div>
     <div id="articles" class="tab-pane">
-		<h5> Top 20 Articles published after 8/1/2014 (cites as of 8/29/2017) -- coming soon for all subjects!</h3>
+		<h5> Top 20 Articles published between August 2014 to August 2017</h3>
 		<table id='articles_table' class="table">
 			<thead>
 				<tr>
@@ -300,11 +300,7 @@
 			}	
 			selected_category=$('#subject_category').find(":selected").text();
 			selected_subject=$('#subject').find(":selected").text();
-			if (['Marketing','Finance','Artificial Intelligence','Accounting'].indexOf(selected_subject) > -1) {
-				top_articles(selected_subject)
-				}else{		
-				document.getElementById("articles_table_body").innerHTML=''
-				}
+			top_articles(selected_subject)
 			$("#path").text(selected_category + ' > ' + selected_subject)
 		}));
 
@@ -314,11 +310,7 @@
 			find_journals(0)
 			selected_category=$('#subject_category').find(":selected").text();
 			selected_subject=$('#subject').find(":selected").text();
-			if (['Marketing','Finance','Artificial Intelligence','Accounting'].indexOf(selected_subject) > -1) {
-				top_articles(selected_subject)
-				}else{		
-				document.getElementById("articles_table_body").innerHTML=''
-				}
+			top_articles(selected_subject)
 			$("#path").text(selected_category + ' > ' + selected_subject)
 			$("#hidden_subject").val(selected_subject)
 			hidden_subject=$("#hidden_subject").val()
@@ -454,10 +446,12 @@
 				result += "<tr>";
 				result += '<td><a href=https://doi.org/'+top_articles[i]['doi']+'>' +top_articles[i]['title']+'</a></td>';
 				result += "<td>";
-				top_articles[i]['authors'].forEach(function(author){
+				for (j=0; j<Math.min(5,top_articles[i]['authors'].length);j++){				
+					author=top_articles[i]['authors'][j]
+					console.log(author)
 					if ('family' in author)	result += author['family']+' '
 					if ('given' in author) result += author['given']+'; '
-				})
+				}
 				result += "</td>";
 				result += '<td><a href=journal.html?issn='+top_articles[i]['issn']+'&title='+encodeURIComponent(top_articles[i]['journal'])+'&publisher='+encodeURIComponent(top_articles[i]['pub'])+'>' +top_articles[i]['journal']+'</a></td>';
 				result += "<td>"+top_articles[i]['year']+"</td>";
@@ -466,6 +460,8 @@
 				result += "</tr>";
 			}
 			document.getElementById("articles_table_body").innerHTML=result
+		}).error(function() { 
+			document.getElementById("articles_table_body").innerHTML=''
 		})
 	}
 
