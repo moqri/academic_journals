@@ -81,11 +81,24 @@
 		    </tbody>
 		</table>
 		<br>
-		<h4>Top Articles</h4>
+		<div class="row">
+		  	<div class="col-sm-4">
+				<h4>Articles</h4>
+				<p id="article_years"> (published from 2014 to 2016) </p>
+			</div>
+			<div class="col-sm-4">
+			</div>			
+			<div class="col-sm-4">
+				<label>Filter by Keyword or Author</label>
+			<input class="form-control" type="text" id="user_input"> 
+		  </div>  
+		</div>
+
 		<table class="table" id='top'>
 			<thead>
 				<th>Open</th>
 				<th>Article</th>
+				<th>Authors</th>
 				<th>Year</th>
 				<th>Citations</th>
 			</thead>
@@ -137,7 +150,6 @@
 		 "WHERE {",
 			s,
 			" <e:title> ?title;",
-			"<e:subjects> ?subjects;",
 			"<e:publisher> ?publisher;",
 			"<e:count_4> ?docs_4; <e:citation_4> ?citation_4; <e:impact_4> ?impact_float_4;",
 			"<e:count_5> ?docs_5; <e:citation_5> ?citation_5; <e:impact_5> ?impact_float_5;",
@@ -146,6 +158,7 @@
 			"<e:citation> ?citation;",
 			"<e:impact> ?impact_float;",
 			"<e:h> ?h;",
+			"OPTIONAL{"+s+"<e:subjects> ?subjects;}",
 		 "}",
 		 "group by ?s ?title ?publisher",
 		 "?docs_4 ?citation_4 ?impact_float_4 ",
@@ -162,7 +175,8 @@
 			}).then(function(data) {
 				journal=data['results']['bindings'][0];
 				title=journal['title']['value'];
-				subjects=journal['subject']['value'];
+				subjects=''
+				if ('subject' in journal) subjects=journal['subject']['value'];
 				count_documents['total']=parseInt(journal['docs']['value']);		
 				count_citation['total']=parseInt(journal['citation']['value']);		
 				impact['total']=journal['impact']['value'];		
@@ -193,11 +207,12 @@
 		};
 	function list_documents(from_year,until_year,offset){
 		$("#load_articles").show()	
+		search=document.getElementById("user_input").value.toLowerCase();
 		offset_global=offset+20
 		offset_from_year=from_year
 		offset_until_year=until_year
-		if (offset==0){ document.getElementById('top').innerHTML='<thead><th>Open</th><th>Article</th><th>Year</th><th>Citations</th></thead>'}
-		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:'+(from_year).toString()+',until-pub-date:'+(until_year).toString()+'&sort=is-referenced-by-count'+'&offset='+offset.toString()		
+		if (offset==0){ document.getElementById('top').innerHTML='<thead><th>Open</th><th>Article</th><th>Authors</th><th>Year</th><th>Citations</th></thead>'}
+		url='http://api.crossref.org/journals/'+issn+'/works?rows=20&filter=from-pub-date:'+(from_year).toString()+',until-pub-date:'+(until_year).toString()+'&query='+search+'&sort=is-referenced-by-count'+'&offset='+offset.toString()
 		dois=[]
 		$.ajax({
 		  	url: url,
@@ -216,8 +231,16 @@
 						yearo=item['published-online']['date-parts'][0][0]
 					}
 					year=Math.min(yearp,yearo)
-					title=item['title']										
-					document.getElementById('top').innerHTML += '<tr><td id='+doi+'></td><td><a href=https://doi.org/'+doi+'>' +title+'</a></td><td>'+year+'</td><td>'+cite+'</td></tr>'
+					title=item['title']	
+					authors=''
+					for (j=0; j<Math.min(5,item['author'].length);j++){				
+						author=item['author'][j]
+						console.log(author)
+						if ('given' in author) authors += author['given']+' '					
+						if ('family' in author)	authors += author['family']+'; '
+					}
+					document.getElementById('top').innerHTML += '<tr><td id='+doi+'></td><td><a href=https://doi.org/'+doi+'>' +title+'</a></td><td>'+authors+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
+
 				});	
 			},
 			complete: function (data){
@@ -229,7 +252,6 @@
 						success: function(data) {							
 							open_link=data['results'][0]['free_fulltext_url']
 							if(open_link){
-								
 								document.getElementById(doi).innerHTML='<a href='+open_link+' target="_blank"><img border="0" alt="open" src="oa_logo.png" width="16" height="25"></a>'
 							}
 						}									
@@ -240,13 +262,33 @@
 
 	}
 	$(document).ready(function () {
-		$('#2014').click(function(){ list_documents(2014,2014,0); return false; });
-		$('#2015').click(function(){ list_documents(2015,2015,0); return false; });
-		$('#2016').click(function(){ list_documents(2016,2016,0); return false; });
-		$('#3-year').click(function(){ list_documents(2014,2016,0); return false; });
+		$('#2014').click(function(){ 
+			list_documents(2014,2014,0); 
+			document.getElementById('article_years').innerHTML= '(published in 2014)'
+			return false
+		});
+		$('#2015').click(function(){ 
+			list_documents(2015,2015,0); 
+			document.getElementById('article_years').innerHTML= '(published in 2015)'
+			return false; });
+		$('#2016').click(function(){ 
+			list_documents(2016,2016,0); 
+			document.getElementById('article_years').innerHTML= '(published in 2016)'
+			return false; });
+		$('#3-year').click(function(){ 
+			list_documents(2014,2016,0); 
+			document.getElementById('article_years').innerHTML= '(published from 2014 to 2016)'
+			return false; });
 		issn=getParameterByName('issn');document.getElementById('issn').innerHTML += issn	
 		title=getParameterByName('title');document.getElementById('title').innerHTML = title	
 		publisher=getParameterByName('publisher');document.getElementById('publisher').innerHTML += publisher	
+		$('#user_input').keypress(function(e){
+			if(e.keyCode==13){
+				//document.getElementById('journals_table_body').innerHTML=''
+				document.getElementById('article_years').innerHTML= '(published from 2014 to 2016)'
+				list_documents(2014,2016,0)
+			}
+		});			
 
 		count_documents={}
 		count_citation={}

@@ -449,8 +449,8 @@
 				for (j=0; j<Math.min(5,top_articles[i]['authors'].length);j++){				
 					author=top_articles[i]['authors'][j]
 					console.log(author)
-					if ('family' in author)	result += author['family']+' '
-					if ('given' in author) result += author['given']+'; '
+					if ('given' in author) result += author['given']+' '					
+					if ('family' in author)	result += author['family']+'; '
 				}
 				result += "</td>";
 				result += '<td><a href=journal.html?issn='+top_articles[i]['issn']+'&title='+encodeURIComponent(top_articles[i]['journal'])+'&publisher='+encodeURIComponent(top_articles[i]['pub'])+'>' +top_articles[i]['journal']+'</a></td>';
