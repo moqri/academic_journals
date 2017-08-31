@@ -233,11 +233,13 @@
 					year=Math.min(yearp,yearo)
 					title=item['title']	
 					authors=''
-					for (j=0; j<Math.min(5,item['author'].length);j++){				
-						author=item['author'][j]
-						console.log(author)
-						if ('given' in author) authors += author['given']+' '					
-						if ('family' in author)	authors += author['family']+'; '
+					if ('author' in item){
+						for (j=0; j<Math.min(5,item['author'].length);j++){				
+							author=item['author'][j]
+							console.log(author)
+							if ('given' in author) authors += author['given']+' '					
+							if ('family' in author)	authors += author['family']+'; '
+						}
 					}
 					document.getElementById('top').innerHTML += '<tr><td id='+doi+'></td><td><a href=https://doi.org/'+doi+'>' +title+'</a></td><td>'+authors+'</td><td>'+year+'</td><td>'+cite+'</td></tr>'
 

@@ -39,13 +39,12 @@
 		<br></br>
 		<div align="center" class="starter-template">
 		<h1>Scholarly Journals Database</h1>		
-		<h5>Based on <a href="https://www.crossref.org/" target="_blank">Crossref</a> Data</h5>
-		<h5>50,100 Journals - 11 Million Articles - 36 Million Citations (2014-2017)</h5>
+		<h5>Based on <a href="https://www.crossref.org/" target="_blank">Crossref</a> Data (2014-2017) - 50,100 Journals - 11 Million Articles - 36 Million Citations </h5>
 		</div>
 		<br>
 		
 	<div class="row">
-	  <div class="col-sm-4">
+	  <div class="col-sm-6">
 		<label>Category</label> 
 		<select class="form-control" id="subject_category">
 			<option selected value="base">Please Select</option>
@@ -78,28 +77,14 @@
 			<option value="Veterinary">Veterinary</option>
 		</select>
 	  </div>
-	  <div class="col-sm-4">
+	  <div class="col-sm-6">
 		<label>Subject</label>  
 		<select class="form-control" id="subject">
 		  <option>Please select a category first</option>
 		</select>  
 	  </div>
-	  <div class="col-sm-4">
-		<label>Filter by Journal Name</label>
-		<input class="form-control" type="text" id="user_input"> 
-	  </div>  
 	</div>
 	<br>
-	<div class="row">	
-		<div class="form-check">
-			<div class="col-sm-4">
-				<label class="form-check-label">
-					<input class="form-check-input" type="checkbox" id="open_check"> Only Open Access Journals
-				</label> 
-			</div>
-		</div>
-	</div>
-
 	<input type="text" id="hidden_subject" value="">
 	<br>
 
@@ -114,6 +99,21 @@
 
   <div id="tabs" class="tab-content">
     <div id="journals" class="tab-pane active">
+    <div class="row">
+    <br>
+	  <div class="col-sm-6">
+	  		<label>Filter by Journal Name:</label>
+	  		<input type="text" id="user_input"> 
+
+	  </div>
+	  	<div class="col-sm-6">	  
+	  		<div class="form-check">
+				<label class="form-check-label">
+					<input class="form-check-input" type="checkbox" id="open_check"></input> Only Open Access Journals
+				</label>
+			</div>
+		</div>
+	</div>
 	<table class="table" id="journals_table">
 		<thead>
 			<tr>
